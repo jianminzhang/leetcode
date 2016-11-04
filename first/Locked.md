@@ -2051,6 +2051,57 @@ int searchColumns(int i, int j, int low, int high, bool opt) {
     return i;
 }
 ```
+##311. Sparse Matrix Multiplication
+###题目：
+Given two sparse matrices A and B, return the result of AB.
+
+You may assume that A's column number is equal to B's row number.
+
+**Example:**
+
+```
+A = [
+  [ 1, 0, 0],
+  [-1, 0, 3]
+]
+
+B = [
+  [ 7, 0, 0 ],
+  [ 0, 0, 0 ],
+  [ 0, 0, 1 ]
+]
+
+
+     |  1 0 0 |   | 7 0 0 |   |  7 0 0 |
+AB = | -1 0 3 | x | 0 0 0 | = | -7 0 3 |
+                  | 0 0 1 |
+```
+
+###思路：
+时间复杂度：O(m * n * l)
+空间复杂度：O(m * l)
+做法就是按照矩阵乘法的过程进行。
+###代码：
+
+```
+vector<vector<int>> multiply(vector<vector<int>>& A, vector<vector<int>>& B) {
+    int m = A.size(), n = A[0].size(), l = B[0].size();
+    vector<vector<int>> res(m, vector<int>(l,0));
+    for(int i = 0; i < m; ++i) {
+        for(int j = 0; j < n; ++j) {
+            if(A[i][j]) {
+                for(int k = 0; k < l; ++k) {
+                    res[i][k] += A[i][j] * B[j][k];
+                }
+            }
+        }
+    }
+    return res;
+}
+```
+
+
+
 
 ##314. Binary Tree Vertical Order Traversal
 ###题目：
@@ -2273,6 +2324,74 @@ int maxSubArrayLen(vector<int>& nums, int k) {
 }
 ```
 
+##333. Largest BST Subtree
+###题目：
+Given a binary tree, find the largest subtree which is a Binary Search Tree (BST), where largest means subtree with largest number of nodes in it.
+
+**Note:**
+
+A subtree must include all of its descendants.
+
+Here's an example:
+
+```
+    10
+    / \
+   5*  15
+  / \   \ 
+ 1*   8* 7
+```
+The Largest BST Subtree in this case is the highlighted one. 
+
+The return value is the subtree's size, which is 3.
+
+**Hint:**
+
+* You can recursively use algorithm similar to **98. Validate Binary Search Tree** at each node of the tree, which will result in O(nlogn) time complexity.
+
+**Follow up:**
+
+Can you figure out ways to solve it with O(n) time complexity?
+###思路：
+构造一个新的结构体，存储以当前节点为根的BST的最小值，最大值和大小，若不是BST，则大小为-1。
+
+dfs遍历整个树，全局变量res记录最大的BST的大小。
+###代码：
+
+```
+class Solution {
+public:
+    struct Node {
+        int size, low, up;
+        Node(int _size, int _low, int _up) : size(_size), low(_low), up(_up) {}
+    };
+    
+    int largestBSTSubtree(TreeNode* root) {
+        res = 0;
+        dfs(root);
+        return res;
+    }
+    
+    Node dfs(TreeNode* root) {
+        if(root == NULL) {
+            return Node(0, INT_MAX, INT_MIN);
+        }
+        
+        Node leftNode = dfs(root->left);
+        Node rightNode = dfs(root->right);
+        
+        if(leftNode.size == -1 || rightNode.size == -1 || root->val < leftNode.up || root->val > rightNode.low) {
+            return Node(-1, 0, 0);
+        }
+        int num = leftNode.size + rightNode.size + 1;
+        res = max(res, num);
+        return Node(num, min(root->val, leftNode.low), max(root->val, rightNode.up));
+    }
+    
+private:
+    int res;
+};
+```
 
 ##339. Nested List Weight Sum
 ###题目：

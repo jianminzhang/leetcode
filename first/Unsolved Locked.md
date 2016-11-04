@@ -184,35 +184,6 @@ sumRegion(2, 1, 4, 3) -> 10
 ###代码：
 
 
-##311. Sparse Matrix Multiplication
-###题目：
-Given two sparse matrices A and B, return the result of AB.
-
-You may assume that A's column number is equal to B's row number.
-
-**Example:**
-
-```
-A = [
-  [ 1, 0, 0],
-  [-1, 0, 3]
-]
-
-B = [
-  [ 7, 0, 0 ],
-  [ 0, 0, 0 ],
-  [ 0, 0, 1 ]
-]
-
-
-     |  1 0 0 |   | 7 0 0 |   |  7 0 0 |
-AB = | -1 0 3 | x | 0 0 0 | = | -7 0 3 |
-                  | 0 0 1 |
-```
-
-###思路：
-###代码：
-
 
 ##317. Shortest Distance from All Buildings
 ###题目：
@@ -254,40 +225,6 @@ Given word = **"word"**, return the following list (order does not matter):
 ```
 ###思路：
 ###代码：
-
-##333. Largest BST Subtree
-###题目：
-Given a binary tree, find the largest subtree which is a Binary Search Tree (BST), where largest means subtree with largest number of nodes in it.
-
-**Note:**
-
-A subtree must include all of its descendants.
-
-Here's an example:
-
-```
-    10
-    / \
-   5*  15
-  / \   \ 
- 1*   8*  7
-```
-The Largest BST Subtree in this case is the highlighted one. 
-
-The return value is the subtree's size, which is 3.
-
-**Hint:**
-
-* You can recursively use algorithm similar to 98. Validate Binary Search Tree at each node of the tree, which will result in O(nlogn) time complexity.
-
-**Follow up:**
-
-Can you figure out ways to solve it with O(n) time complexity?
-###思路：
-
-###代码：
-
-
 
 
 ##348. Design Tic-Tac-Toe
@@ -584,7 +521,7 @@ Returns **[4, 5, 3], [2], [1]**.
 ###代码：
 
 
-##379. Design Phone Directory
+##379. Design Phone Directory **
 ###题目：
 Design a Phone Directory which supports the following operations:
 
