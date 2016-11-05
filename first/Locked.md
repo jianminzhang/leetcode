@@ -1252,6 +1252,89 @@ int closestValue(TreeNode* root, double target) {
     return res;
 }
 ```
+##271. Encode and Decode Strings
+###题目：
+Design an algorithm to encode **a list of strings** to **a string**. The encoded string is then sent over the network and is decoded back to the original list of strings.
+
+Machine 1 (sender) has the function:
+
+```
+string encode(vector<string> strs) {
+  // ... your code
+  return encoded_string;
+}
+```
+Machine 2 (receiver) has the function:
+
+```
+vector<string> decode(string s) {
+  //... your code
+  return strs;
+}
+```
+So Machine 1 does:
+
+```
+string encoded_string = encode(strs);
+```
+and Machine 2 does:
+
+```
+vector<string> strs2 = decode(encoded_string);
+```
+**strs2** in Machine 2 should be the same as **strs** in Machine 1.
+
+Implement the **encode** and **decode** methods.
+
+**Note:**
+
+* The string may contain any possible characters out of 256 valid ascii characters. Your algorithm should be generalized enough to work on any possible characters.
+* Do not use class member/global/static variables to store states. Your encode and decode algorithms should be stateless.
+* Do not rely on any library method such as **eval** or serialize methods. You should implement your own encode/decode algorithm.
+
+###思路：
+**编码方式：**
+
+对于每一个字符串，都编码成：长度+“@”（类似的特殊符号）+字符串
+
+**解码方式：**
+
+先找到第一个“@”，前面的数字必定是字符串长度，然后将“@”后面相应长度的字符串放入答案，循环进行。
+
+###代码：
+
+```
+class Codec {
+public:
+
+    // Encodes a list of strings to a single string.
+    string encode(vector<string>& strs) {
+        string res = "";
+        for(string s : strs) {
+            res += to_string(s.size()) + "@" + s;
+        }
+        return res;
+    }
+
+    // Decodes a single string to a list of strings.
+    vector<string> decode(string s) {
+        vector<string> res;
+        int p = 0, len = s.size();
+        while(p < len) {
+            int pos = s.find_first_of("@", p);
+            int l = stoi(s.substr(p, pos - p));
+            string str = s.substr(pos+1, l);
+            res.push_back(str);
+            p = pos + l + 1;
+        }
+        return res;
+    }
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec codec;
+// codec.decode(codec.encode(strs));
+```
 
 ##272. Closest Binary Search Tree Value II
 ###题目：
@@ -1460,44 +1543,7 @@ void wiggleSort(vector<int>& nums) {
 }
 ```
 
-##285. Inorder Successor in BST
-###题目：
-Given a binary search tree and a node in it, find the in-order successor of that node in the BST.
 
-Note: If the given node has no in-order successor in the tree, return **null**.
-
-###思路：
-在BST中寻找某个固定节点的后继，即找到比这个节点值大的最小的节点。
-
-如果这个节点存在右儿子，那么答案是右子树中最左边的节点；
-
-如果没有右儿子，那么就是从root到p最后一个向左转的节点。
-
-###代码：
-
-```
-TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
-    if(!p) return p;
-    if(p->right) {
-        TreeNode *q = p->right;
-        while(q->left) {
-            q = q->left;
-        }
-        return q;
-    }
-    
-    TreeNode *res = NULL;
-    while(root->val != p->val) {
-        if(root->val < p->val) {
-            root = root->right;
-        }else {
-            res = root;
-            root = root->left;
-        }
-    }
-    return res;
-}
-```
 ##281. Zigzag Iterator
 ###题目：
 Given two 1d vectors, implement an iterator to return their elements alternately.
@@ -1596,6 +1642,44 @@ private:
  * ZigzagIterator i(v1, v2);
  * while (i.hasNext()) cout << i.next();
  */
+```
+##285. Inorder Successor in BST
+###题目：
+Given a binary search tree and a node in it, find the in-order successor of that node in the BST.
+
+Note: If the given node has no in-order successor in the tree, return **null**.
+
+###思路：
+在BST中寻找某个固定节点的后继，即找到比这个节点值大的最小的节点。
+
+如果这个节点存在右儿子，那么答案是右子树中最左边的节点；
+
+如果没有右儿子，那么就是从root到p最后一个向左转的节点。
+
+###代码：
+
+```
+TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+    if(!p) return p;
+    if(p->right) {
+        TreeNode *q = p->right;
+        while(q->left) {
+            q = q->left;
+        }
+        return q;
+    }
+    
+    TreeNode *res = NULL;
+    while(root->val != p->val) {
+        if(root->val < p->val) {
+            root = root->right;
+        }else {
+            res = root;
+            root = root->left;
+        }
+    }
+    return res;
+}
 ```
 
 ##286. Walls and Gates
@@ -1751,6 +1835,76 @@ public:
 // ValidWordAbbr vwa(dictionary);
 // vwa.isUnique("hello");
 // vwa.isUnique("anotherWord");
+```
+##291. Word Pattern II
+###题目：
+Given a **pattern** and a string **str**, find if **str** follows the same pattern.
+
+Here follow means a full match, such that there is a bijection between a letter in **pattern** and a non-empty substring in **str**.
+
+Examples:
+
+* pattern = **"abab"**, str = **"redblueredblue"** should return true.
+* pattern = **"aaaa"**, str = **"asdasdasdasd"** should return true.
+* pattern = **"aabb"**, str = **"xyzabcxzyabc"** should return false.
+
+**Notes:**
+
+You may assume both pattern and str contains only lowercase letters.
+
+###思路：
+1、建立两个map来保证字符和字符串一一对应。
+
+2、两个指针遍历pattern和str，如果两个指针都处理到最后，那么返回true，如果存在不同步，返回false;
+
+3、str向后试着处理，如果与原先的map内容矛盾那么继续是其他情况，否则加入map，并且向后进行，如果并不能返回true，那么从map中删除掉这次加入的部分（完成回溯）。
+
+###代码：
+
+```
+private:
+    unordered_map<char, string> pHash;
+    unordered_map<string, char> sHash;
+public:
+
+    bool wordPatternMatch(string pattern, string str) {
+        return match(pattern, 0, str, 0);
+    }
+    
+    bool match(string &p, int i, string &s, int j) {
+        int m = p.size();
+        int n = s.size();
+        if(i == m || j == n) {
+            if(i == m && j == n)
+                return true;
+            else return false;
+        }
+        else {
+            bool yes = false;
+            for(int k = j; k < n; ++k) {
+                string now = s.substr(j, k-j+1);
+                if(pHash.find(p[i]) != pHash.end()) {
+                    if(pHash[p[i]] != now)
+                        continue;
+                }
+                else if(sHash.find(now) != sHash.end()) {
+                    if(sHash[now] != p[i])
+                        continue;
+                }else {
+                    pHash[p[i]] = now;
+                    sHash[now] = p[i];
+                    yes = true;
+                }
+                if(match(p, i+1, s, k+1))
+                    return true;
+                if(yes) {
+                     pHash.erase(p[i]);
+                     sHash.erase(now);
+                } 
+            }
+            return false;
+        }
+    }
 ```
 
 
@@ -2051,6 +2205,99 @@ int searchColumns(int i, int j, int low, int high, bool opt) {
     return i;
 }
 ```
+##305. Number of Islands II
+###题目：
+A 2d grid map of **m** rows and **n** columns is initially filled with water. We may perform an addLand operation which turns the water at position (row, col) into a land. Given a list of positions to operate, **count the number of islands after each addLand operation**. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+
+**Example:**
+
+Given **m = 3, n = 3, positions = [[0,0], [0,1], [1,2], [2,1]]**.
+
+Initially, the 2d grid grid is filled with water. (Assume 0 represents water and 1 represents land).
+
+```
+0 0 0
+0 0 0
+0 0 0
+```
+Operation #1: addLand(0, 0) turns the water at grid[0][0] into a land.
+
+```
+1 0 0
+0 0 0   Number of islands = 1
+0 0 0
+```
+Operation #2: addLand(0, 1) turns the water at grid[0][1] into a land.
+
+```
+1 1 0
+0 0 0   Number of islands = 1
+0 0 0
+```
+Operation #3: addLand(1, 2) turns the water at grid[1][2] into a land.
+
+```
+1 1 0
+0 0 1   Number of islands = 2
+0 0 0
+```
+Operation #4: addLand(2, 1) turns the water at grid[2][1] into a land.
+
+```
+1 1 0
+0 0 1   Number of islands = 3
+0 1 0
+```
+We return the result as an array: **[1, 1, 2, 3]**
+
+**Challenge:**
+
+Can you do it in time complexity O(k log mn), where k is the length of the **positions**?
+
+###思路：
+并查集的思想。
+
+初始化将矩阵中每个点的root都设为-1，表示不是陆地。
+
+没加入一个点，首先将其父亲设为自己，陆地数目+1，然后遍历其上下左右四个方向，如果存在陆地，那么合并，合并的同时陆地数目-1。
+
+###代码：
+
+```
+private:
+    vector<int> root;
+    int go[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+public:
+    int findRoot (int now) {
+        if(root[now] == now) 
+            return now;
+        else return root[now] = findRoot(root[now]);
+    }
+    vector<int> numIslands2(int m, int n, vector<pair<int, int>>& positions) {
+        root = vector<int>(m * n, -1);
+        vector<int> res;
+        int landNum = 0;
+        for(auto p : positions) {
+            int x = p.first, y = p.second, index = x * n + y;
+            root[index] = index;
+            landNum++;
+            for(auto dir : go) {
+                int nowx = x + dir[0], nowy = y + dir[1], nowindex = nowx * n + nowy;
+                if(nowx >= 0 && nowx < m && nowy >= 0 && nowy < n && root[nowindex] != -1) {
+                    int nowP = findRoot(nowindex), P = findRoot(index);
+                    if(P != nowP) {
+                        root[P] = nowP;
+                        --landNum;
+                    }
+                }
+            }
+            res.push_back(landNum);
+        }
+        return res;
+    }
+```
+
+
 ##311. Sparse Matrix Multiplication
 ###题目：
 Given two sparse matrices A and B, return the result of AB.
@@ -2211,6 +2458,47 @@ vector<vector<int>> verticalOrder(TreeNode* root) {
     return res;
 }
 ```
+
+##320. Generalized Abbreviation
+###题目：
+Write a function to generate the generalized abbreviations of a word.
+
+**Example:**
+
+Given word = **"word"**, return the following list (order does not matter):
+
+```
+["word", "1ord", "w1rd", "wo1d", "wor1", "2rd", "w2d", "wo2", "1o1d", "1or1", "w1r1", "1o2", "2r1", "3d", "w3", "4"]
+```
+###思路：
+主要区分好两个数字不可以重复出现，dfs的时候传入上一步是否使用了数字。
+
+每一步都可以将拼写加上word目前处理的这一位字符，或者使用数字代替，数字代替的个数可以循环遍历。
+###代码：
+
+```
+vector<string> generateAbbreviations(string word) {
+    int len = word.size();
+    vector<string> res;
+    dfs(word, res, 0, false, "", len);
+    return res;
+}
+
+void dfs(string &word, vector<string> &res, int i, bool yes, string now, const int len) {
+    if(i == len) {
+        res.push_back(now);
+        return;
+    }
+    dfs(word, res, i + 1, false, now + word[i], len);
+    if(!yes) {
+        for(int j = 1; j + i <= len; ++j) {
+            dfs(word, res, i + j, true, now + to_string(j), len);
+        }
+    }
+}
+```
+
+
 
 ##323. Number of Connected Components in an Undirected Graph
 ###题目：
@@ -2514,6 +2802,116 @@ public:
  * double param_1 = obj.next(val);
  */
 ```
+##348. Design Tic-Tac-Toe
+###题目：
+Design a Tic-tac-toe game that is played between two players on a n x n grid.
+
+You may assume the following rules:
+
+* A move is guaranteed to be valid and is placed on an empty block.
+* Once a winning condition is reached, no more moves is allowed.
+* A player who succeeds in placing n of their marks in a horizontal, vertical, or diagonal row wins the game.
+
+**Example:**
+
+```
+Given n = 3, assume that player 1 is "X" and player 2 is "O" in the board.
+
+TicTacToe toe = new TicTacToe(3);
+
+toe.move(0, 0, 1); -> Returns 0 (no one wins)
+|X| | |
+| | | |    // Player 1 makes a move at (0, 0).
+| | | |
+
+toe.move(0, 2, 2); -> Returns 0 (no one wins)
+|X| |O|
+| | | |    // Player 2 makes a move at (0, 2).
+| | | |
+
+toe.move(2, 2, 1); -> Returns 0 (no one wins)
+|X| |O|
+| | | |    // Player 1 makes a move at (2, 2).
+| | |X|
+
+toe.move(1, 1, 2); -> Returns 0 (no one wins)
+|X| |O|
+| |O| |    // Player 2 makes a move at (1, 1).
+| | |X|
+
+toe.move(2, 0, 1); -> Returns 0 (no one wins)
+|X| |O|
+| |O| |    // Player 1 makes a move at (2, 0).
+|X| |X|
+
+toe.move(1, 0, 2); -> Returns 0 (no one wins)
+|X| |O|
+|O|O| |    // Player 2 makes a move at (1, 0).
+|X| |X|
+
+toe.move(2, 1, 1); -> Returns 1 (player 1 wins)
+|X| |O|
+|O|O| |    // Player 1 makes a move at (2, 1).
+|X|X|X|
+```
+**Follow up:**
+
+Could you do better than O(n2) per move() operation?
+
+**Hint:**
+
+* Could you trade extra space such that move() operation can be done in O(1)?
+* You need two arrays: int rows[n], int cols[n], plus two variables: diagonal, anti_diagonal.
+
+###思路：
+1、用两个数组分别表示某行某列某个选手下的棋子的个数，如果个数达到n，则说明这一行或者一列都是这个选手的棋子，即可说明这个选手获胜；
+
+2、这里运用了一个技巧，选手1下棋+1，选手二-1，则如果结果等于n，说明是选手1下了n次，等于-n，则说明选手二下了n次，只要不是这两种说明两个选手都下了，都无法成功。
+
+3、初始化方法要注意掌握。
+###代码：
+
+```
+class TicTacToe {
+private:
+    vector<int> Row;
+    vector<int> Col;
+    int Dia1;
+    int Dia2;
+    int num;
+public:
+    /** Initialize your data structure here. */
+    TicTacToe(int n) : num(n), Row(n), Col(n), Dia1(0), Dia2(0){}
+    
+    
+    /** Player {player} makes a move at ({row}, {col}).
+        @param row The row of the board.
+        @param col The column of the board.
+        @param player The player, can be either 1 or 2.
+        @return The current winning condition, can be either:
+                0: No one wins.
+                1: Player 1 wins.
+                2: Player 2 wins. */
+    int move(int row, int col, int player) {
+        int sig = player == 1 ? 1 : -1;
+        Row[row] += sig;
+        Col[col] += sig;
+        if(row == col) Dia1 += sig;
+        if(row + col == num-1) Dia2 += sig;
+        if(Row[row] == num || Col[col] == num || Dia1 == num || Dia2 == num) return 1;
+        else if(Row[row] == -num || Col[col] == -num || Dia1 == -num || Dia2 == -num) return 2;
+        else return 0;
+    }
+};
+
+/**
+ * Your TicTacToe object will be instantiated and called as such:
+ * TicTacToe obj = new TicTacToe(n);
+ * int param_1 = obj.move(row,col,player);
+ */
+```
+
+
 ##356. Line Reflection
 ###题目：
 Given n points on a 2D plane, find if there is such a line parallel to y-axis that reflect the given points.

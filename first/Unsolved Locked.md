@@ -26,67 +26,6 @@ return the root of the binary tree [4,5,2,#,#,3,1].
 ###思路：
 ###代码：
 
-##271. Encode and Decode Strings
-###题目：
-Design an algorithm to encode **a list of strings** to **a string**. The encoded string is then sent over the network and is decoded back to the original list of strings.
-
-Machine 1 (sender) has the function:
-
-```
-string encode(vector<string> strs) {
-  // ... your code
-  return encoded_string;
-}
-```
-Machine 2 (receiver) has the function:
-
-```
-vector<string> decode(string s) {
-  //... your code
-  return strs;
-}
-```
-So Machine 1 does:
-
-```
-string encoded_string = encode(strs);
-```
-and Machine 2 does:
-
-```
-vector<string> strs2 = decode(encoded_string);
-```
-**strs2** in Machine 2 should be the same as **strs** in Machine 1.
-
-Implement the **encode** and **decode** methods.
-
-**Note:**
-
-* The string may contain any possible characters out of 256 valid ascii characters. Your algorithm should be generalized enough to work on any possible characters.
-* Do not use class member/global/static variables to store states. Your encode and decode algorithms should be stateless.
-* Do not rely on any library method such as **eval** or serialize methods. You should implement your own encode/decode algorithm.
-
-###思路：
-###代码：
-
-
-
-
-##291. Word Pattern II
-###题目：
-Given a **pattern** and a string **str**, find if **str** follows the same pattern.
-
-Here follow means a full match, such that there is a bijection between a letter in **pattern** and a non-empty substring in **str**.
-
-Examples:
-
-* pattern = **"abab"**, str = **"redblueredblue"** should return true.
-* pattern = **"aaaa"**, str = **"asdasdasdasd"** should return true.
-* pattern = **"aabb"**, str = **"xyzabcxzyabc"** should return false.
-
-**Notes:**
-
-You may assume both pattern and str contains only lowercase letters.
 
 ##294. Flip Game II
 ###题目：
@@ -102,58 +41,6 @@ Derive your algorithm's runtime complexity.
 
 
 
-##305. Number of Islands II
-###题目：
-A 2d grid map of **m** rows and **n** columns is initially filled with water. We may perform an addLand operation which turns the water at position (row, col) into a land. Given a list of positions to operate, **count the number of islands after each addLand operation**. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
-
-**Example:**
-
-Given **m = 3, n = 3, positions = [[0,0], [0,1], [1,2], [2,1]]**.
-
-Initially, the 2d grid grid is filled with water. (Assume 0 represents water and 1 represents land).
-
-```
-0 0 0
-0 0 0
-0 0 0
-```
-Operation #1: addLand(0, 0) turns the water at grid[0][0] into a land.
-
-```
-1 0 0
-0 0 0   Number of islands = 1
-0 0 0
-```
-Operation #2: addLand(0, 1) turns the water at grid[0][1] into a land.
-
-```
-1 1 0
-0 0 0   Number of islands = 1
-0 0 0
-```
-Operation #3: addLand(1, 2) turns the water at grid[1][2] into a land.
-
-```
-1 1 0
-0 0 1   Number of islands = 2
-0 0 0
-```
-Operation #4: addLand(2, 1) turns the water at grid[2][1] into a land.
-
-```
-1 1 0
-0 0 1   Number of islands = 3
-0 1 0
-```
-We return the result as an array: **[1, 1, 2, 3]**
-
-**Challenge:**
-
-Can you do it in time complexity O(k log mn), where k is the length of the **positions**?
-
-###思路：
-
-###代码：
 
 ##308. Range Sum Query 2D - Mutable
 ###题目:
@@ -212,85 +99,7 @@ There will be at least one building. If it is not possible to build such house a
 
 ###代码：
 
-##320. Generalized Abbreviation
-###题目：
-Write a function to generate the generalized abbreviations of a word.
 
-**Example:**
-
-Given word = **"word"**, return the following list (order does not matter):
-
-```
-["word", "1ord", "w1rd", "wo1d", "wor1", "2rd", "w2d", "wo2", "1o1d", "1or1", "w1r1", "1o2", "2r1", "3d", "w3", "4"]
-```
-###思路：
-###代码：
-
-
-##348. Design Tic-Tac-Toe
-###题目：
-Design a Tic-tac-toe game that is played between two players on a n x n grid.
-
-You may assume the following rules:
-
-* A move is guaranteed to be valid and is placed on an empty block.
-* Once a winning condition is reached, no more moves is allowed.
-* A player who succeeds in placing n of their marks in a horizontal, vertical, or diagonal row wins the game.
-
-**Example:**
-
-```
-Given n = 3, assume that player 1 is "X" and player 2 is "O" in the board.
-
-TicTacToe toe = new TicTacToe(3);
-
-toe.move(0, 0, 1); -> Returns 0 (no one wins)
-|X| | |
-| | | |    // Player 1 makes a move at (0, 0).
-| | | |
-
-toe.move(0, 2, 2); -> Returns 0 (no one wins)
-|X| |O|
-| | | |    // Player 2 makes a move at (0, 2).
-| | | |
-
-toe.move(2, 2, 1); -> Returns 0 (no one wins)
-|X| |O|
-| | | |    // Player 1 makes a move at (2, 2).
-| | |X|
-
-toe.move(1, 1, 2); -> Returns 0 (no one wins)
-|X| |O|
-| |O| |    // Player 2 makes a move at (1, 1).
-| | |X|
-
-toe.move(2, 0, 1); -> Returns 0 (no one wins)
-|X| |O|
-| |O| |    // Player 1 makes a move at (2, 0).
-|X| |X|
-
-toe.move(1, 0, 2); -> Returns 0 (no one wins)
-|X| |O|
-|O|O| |    // Player 2 makes a move at (1, 0).
-|X| |X|
-
-toe.move(2, 1, 1); -> Returns 1 (player 1 wins)
-|X| |O|
-|O|O| |    // Player 1 makes a move at (2, 1).
-|X|X|X|
-```
-**Follow up:**
-
-Could you do better than O(n2) per move() operation?
-
-**Hint:**
-
-* Could you trade extra space such that move() operation can be done in O(1)?
-* You need two arrays: int rows[n], int cols[n], plus two variables: diagonal, anti_diagonal.
-
-###思路：
-
-###代码：
 
 ##351. Android Unlock Patterns
 ###题目：
