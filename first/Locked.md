@@ -2297,6 +2297,99 @@ public:
     }
 ```
 
+##308. Range Sum Query 2D - Mutable **
+###题目:
+Given a 2D matrix matrix, find the sum of the elements inside the rectangle defined by its upper left corner (row1, col1) and lower right corner (row2, col2).
+
+**Example:**
+
+```
+Given matrix = [
+  [3, 0, 1, 4, 2],
+  [5, 6, 3, 2, 1],
+  [1, 2, 0, 1, 5],
+  [4, 1, 0, 1, 7],
+  [1, 0, 3, 0, 5]
+]
+
+sumRegion(2, 1, 4, 3) -> 8
+update(3, 2, 2)
+sumRegion(2, 1, 4, 3) -> 10
+```
+**Note:**
+
+* The matrix is only modifiable by the update function.
+* You may assume the number of calls to update and sumRegion function is distributed evenly.
+* You may assume that row1 ≤ row2 and col1 ≤ col2.
+
+###思路：
+
+###代码：
+
+```
+// Time:  ctor:   O(mlogm * nlogn)
+//        update: O(logm * logn)
+//        query:  O(logm * logn)
+// Space: O(m * n)
+// Binary Indexed Tree (BIT) solution.
+
+class NumMatrix {
+public:
+    int **C;
+    int n, m;
+    NumMatrix(vector<vector<int>> &matrix) {
+        n = matrix.size();
+        m = n == 0 ? 0 : matrix[0].size();
+        C = new int *[n + 1];
+        for (int i = 0; i <= n; ++i) C[i] = new int[m + 1];
+        
+        for (int i = 0; i <= n; ++i)
+            for (int j = 0; j <= m; ++j) C[i][j] = 0;
+        
+        for (int i = 0; i < n; ++i)
+            for (int j = 0; j < m; ++j) {
+                int val = matrix[i][j];
+                for (int p = i + 1; p <= n; p += lowbit(p))
+                    for (int q = j + 1; q <= m; q += lowbit(q)) C[p][q] += val;
+            }
+    }
+    
+    int lowbit(int x) { return x & (-x); }
+    void update(int row, int col, int val) {
+        int t = sumRegion(row, col, row, col);
+        val = val - t;
+        
+        row++;
+        col++;
+        for (int i = row; i <= n; i += lowbit(i))
+            for (int j = col; j <= m; j += lowbit(j)) C[i][j] += val;
+    }
+    
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        row1++;
+        col1++;
+        row2++;
+        col2++;
+        return sum(row2, col2) - sum(row1 - 1, col2) - sum(row2, col1 - 1) +
+        sum(row1 - 1, col1 - 1);
+    }
+    
+    int sum(int x, int y) {
+        int res = 0;
+        for (int i = x; i >= 1; i -= lowbit(i))
+            for (int j = y; j >= 1; j -= lowbit(j)) {
+                res += C[i][j];
+            }
+        return res;
+    }
+};
+
+// Your NumMatrix object will be instantiated and called as such:
+// NumMatrix numMatrix(matrix);
+// numMatrix.sumRegion(0, 1, 2, 3);
+// numMatrix.update(1, 1, 10);
+// numMatrix.sumRegion(1, 2, 3, 4);
+```
 
 ##311. Sparse Matrix Multiplication
 ###题目：
@@ -3008,6 +3101,222 @@ public:
  */
 ```
 
+##351. Android Unlock Patterns
+###题目：
+Given an Android **3x3** key lock screen and two integers m and n, where 1 ≤ m ≤ n ≤ 9, count the total number of unlock patterns of the Android lock screen, which consist of minimum of m keys and maximum n keys.
+
+**Rules for a valid pattern:**
+
+* Each pattern must connect at least m keys and at most n keys.
+* All the keys must be distinct.
+* If the line connecting two consecutive keys in the pattern passes through any other keys, the other keys must have previously selected in the pattern. No jumps through non selected key is allowed.
+* The order of keys used matters.
+
+**Explanation:**
+
+```
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+| 7 | 8 | 9 |
+```
+Invalid move: **4 - 1 - 3 - 6** 
+
+Line 1 - 3 passes through key 2 which had not been selected in the pattern.
+
+Invalid move: **4 - 1 - 9 - 2**
+
+Line 1 - 9 passes through key 5 which had not been selected in the pattern.
+
+Valid move: **2 - 4 - 1 - 3 - 6**
+
+Line 1 - 3 is valid because it passes through key 2, which had been selected in the pattern
+
+Valid move: **6 - 5 - 4 - 1 - 9 - 2**
+
+Line 1 - 9 is valid because it passes through key 5, which had been selected in the pattern.
+
+**Example:**
+
+Given m = 1, n = 1, return 9.
+
+**Credits:**
+
+Special thanks to @elmirap for adding this problem and creating all test cases.
+
+###思路：
+dfs思路。
+
+以1-9中任意一个数字开始，Dfs剩下的数字，如果没有遍历过并且他们之间没有跨过未处理的数字，那么进入下一层的遍历。
+###代码：
+
+```
+class Solution {
+private:
+    int skip[10][10];
+    bool yes[10];
+    int res = 0;
+public:
+    void init() {
+        memset(skip, -1, sizeof(skip));
+        skip[1][3] = 2;
+        skip[4][6] = 5;
+        skip[7][9] = 8;
+        skip[1][7] = 4;
+        skip[2][8] = 5;
+        skip[3][9] = 6;
+        skip[1][9] = 5;
+        skip[3][7] = 5;
+        
+        skip[3][1] = 2;
+        skip[6][4] = 5;
+        skip[9][7] = 8;
+        skip[7][1] = 4;
+        skip[8][2] = 5;
+        skip[9][3] = 6;
+        skip[9][1] = 5;
+        skip[7][3] = 5;
+    }
+    
+    void dfs(int now, int num, const int m, const int n) {
+        yes[now] = 1;
+        if(num >= m && num <= n) {
+            res++;
+        }
+        if(num > n) {
+            yes[now] = 0;
+            return;
+        }
+        for(int i = 1; i <= 9; ++i) {
+            if(yes[i]) continue;
+            if(skip[now][i] != -1 && yes[skip[now][i]] == false) continue;
+            dfs(i, num+1, m, n);
+        }
+        yes[now] = 0;
+    }
+    
+    int numberOfPatterns(int m, int n) {
+        init();
+        for(int i = 1; i <= 9; ++i) {
+            dfs(i, 1,  m, n);
+        }
+        return res;
+    }
+};
+```
+
+##353. Design Snake Game
+###题目：
+Design a Snake game that is played on a device with screen size = width x height. Play the game online if you are not familiar with the game.
+
+The snake is initially positioned at the top left corner (0,0) with length = 1 unit.
+
+You are given a list of food's positions in row-column order. When a snake eats the food, its length and the game's score both increase by 1.
+
+Each food appears one by one on the screen. For example, the second food will not appear until the first food was eaten by the snake.
+
+When a food does appear on the screen, it is guaranteed that it will not appear on a block occupied by the snake.
+
+**Example:**
+
+```
+Given width = 3, height = 2, and food = [[1,2],[0,1]].
+
+Snake snake = new Snake(width, height, food);
+
+Initially the snake appears at position (0,0) and the food at (1,2).
+
+|S| | |
+| | |F|
+
+snake.move("R"); -> Returns 0
+
+| |S| |
+| | |F|
+
+snake.move("D"); -> Returns 0
+
+| | | |
+| |S|F|
+
+snake.move("R"); -> Returns 1 (Snake eats the first food and right after that, the second food appears at (0,1) )
+
+| |F| |
+| |S|S|
+
+snake.move("U"); -> Returns 1
+
+| |F|S|
+| | |S|
+
+snake.move("L"); -> Returns 2 (Snake eats the second food)
+
+| |S|S|
+| | |S|
+
+snake.move("U"); -> Returns -1 (Game over because snake collides with border)
+```
+
+###思路：
+代码如下。
+###代码：
+
+```
+class SnakeGame {
+public:
+/** Initialize your data structure here.
+@param width - screen width
+@param height - screen height
+@param food - A list of food positions
+E.g food = [[1,1], [1,0]] means the first food is positioned at [1,1], the second is at [1,0]. */
+
+int w, h, pos;
+vector<pair<int, int>> food;
+set<pair<int, int>> hist;
+deque<pair<int, int>> q;
+
+SnakeGame(int width, int height, vector<pair<int, int>> food) {
+	this->food = food;
+	w = width, h = height, pos = 0;
+	q.push_back(make_pair(0, 0));
+}
+
+/** Moves the snake.
+@param direction - 'U' = Up, 'L' = Left, 'R' = Right, 'D' = Down
+@return The game's score after the move. Return -1 if game over.
+Game over when snake crosses the screen boundary or bites its body. */
+int move(string direction) {
+	int row = q.back().first, col = q.back().second;
+	pair<int, int> d = q.front(); q.pop_front();
+	hist.erase(d);
+
+	if (direction == "U")
+		row--;
+	else if (direction == "D")
+		row++;
+	else if (direction == "L")
+		col--;
+	else if (direction == "R")
+		col++;
+
+	if (row < 0 || col < 0 || col >= w || row >= h || hist.count(make_pair(row, col)))
+		return -1;
+
+	hist.insert(make_pair(row, col));
+	q.push_back(make_pair(row, col));
+
+	if (pos >= food.size())
+		return food.size();
+
+	if (row == food[pos].first && col == food[pos].second) {
+		pos++;
+		q.push_front(d);
+		hist.insert(d);
+	}
+
+	return pos;
+  }
+};
+```
 
 ##356. Line Reflection
 ###题目：
@@ -3754,6 +4063,107 @@ vector<int> getModifiedArray(int length, vector<vector<int>>& updates) {
 }
 ```
 
+##379. Design Phone Directory
+###题目：
+Design a Phone Directory which supports the following operations:
+
+* **get**: Provide a number which is not assigned to anyone.
+* **check**: Check if a number is available or not.
+* **release**: Recycle or release a number.
+
+**Example:**
+
+```
+// Init a phone directory containing a total of 3 numbers: 0, 1, and 2.
+PhoneDirectory directory = new PhoneDirectory(3);
+
+// It can return any available phone number. Here we assume it returns 0.
+directory.get();
+
+// Assume it returns 1.
+directory.get();
+
+// The number 2 is available, so return true.
+directory.check(2);
+
+// It returns 2, the only number that is left.
+directory.get();
+
+// The number 2 is no longer available, so return false.
+directory.check(2);
+
+// Release number 2 back to the pool.
+directory.release(2);
+
+// Number 2 is available again, return true.
+directory.check(2);
+```
+###思路：
+主要是注意实现。
+
+思路就是一个队列或者链表来表示还可以分配的号码，一个数组来表示哪些号码已经用过。初始化队列放入全部号码，数组全部为false；
+
+实现get函数：如果队列不为空，返回并且删除队列头，将数组相应值设为true；
+
+实现check函数：查询数组中相应位置为true则为用过，false则为没用过；
+
+实现release函数：如果用过，将数组设为false,并将其加入到队列中，否则什么都不做。
+###代码：
+
+```
+class PhoneDirectory {
+private:
+    int maxNum;
+    queue<int> q;
+    bool *s;
+public:
+    /** Initialize your data structure here
+        @param maxNumbers - The maximum numbers that can be stored in the phone directory. */
+    PhoneDirectory(int maxNumbers) {
+        maxNum = maxNumbers;
+        s = new bool[maxNum];
+        memset(s, false, sizeof(s));
+        for(int i = 0; i < maxNumbers; ++i) {
+            q.push(i);
+        }
+    }
+    
+    /** Provide a number which is not assigned to anyone.
+        @return - Return an available number. Return -1 if none is available. */
+    int get() {
+        if(q.empty()) return -1;
+        else {
+            int now = q.front();
+            q.pop();
+            s[now] = true;
+            return now;
+        }
+    }
+    
+    /** Check if a number is available or not. */
+    bool check(int number) {
+        return !s[number];
+    }
+    
+    /** Recycle or release a number. */
+    void release(int number) {
+        if (!s[number]) return;
+        s[number] = false;
+        q.push(number);
+    }
+};
+
+
+/**
+ * Your PhoneDirectory object will be instantiated and called as such:
+ * PhoneDirectory obj = new PhoneDirectory(maxNumbers);
+ * int param_1 = obj.get();
+ * bool param_2 = obj.check(number);
+ * obj.release(number);
+ */
+```
+
+
 ##408. Valid Word Abbreviation
 ###题目：
 Given a non-empty string **s** and an abbreviation **abbr**, return whether the string matches with the given abbreviation.
@@ -3806,6 +4216,207 @@ bool validWordAbbreviation(string word, string abbr) {
         }
     }
     return (i == lena && j == lenw);
+}
+```
+
+##411. Minimum Unique Word Abbreviation **
+###题目：
+A string such as **"word"** contains the following abbreviations:
+
+```
+["word", "1ord", "w1rd", "wo1d", "wor1", "2rd", "w2d", "wo2", "1o1d", "1or1", "w1r1", "1o2", "2r1", "3d", "w3", "4"]
+```
+Given a target string and a set of strings in a dictionary, find an abbreviation of this target string with the ***smallest possible*** length such that it does not conflict with abbreviations of the strings in the dictionary.
+
+Each **number** or letter in the abbreviation is considered length = 1. For example, the abbreviation "a32bc" has length = 4.
+
+**Note:**
+
+* In the case of multiple answers as shown in the second example below, you may return any one of them.
+* Assume length of target string = **m**, and dictionary size = **n**. You may assume that **m ≤ 21, n ≤ 1000**, and **log2(n) + m ≤ 20**.
+
+**Examples:**
+
+```
+"apple", ["blade"] -> "a4" (because "5" or "4e" conflicts with "blade")
+
+"apple", ["plain", "amber", "blade"] -> "1p3" (other valid answers include "ap3", "a3e", "2p2", "3le", "3l1").
+```
+###思路：
+
+###代码：
+
+```
+class Solution {  
+public:  
+    string minAbbreviation(string target, vector<string>& dictionary) {  
+        int len=target.size();  
+        if(len==0) return "";  
+        vector<string> dic;  
+        for(string s:dictionary) {  
+            if(s.size()==len) {  
+                dic.push_back(s);  
+            }  
+        }  
+        int len_d=dic.size();  
+        if(len_d==0) return to_string(len);  
+        string res=target;  
+        dfs("",0,target,0,dic,res,len);  
+        return res;  
+    }  
+  
+    void dfs(string cur,int cur_len,string& target,int pos,vector<string>&dic,string&res,int& minlen) {  
+        if(pos>=(int)target.size()) {  
+            if(cur_len<minlen) {  //剪枝  
+                bool f=true;  
+                for(string s:dic) {  
+                    if(validWordAbbreviation(s,cur)) {  
+                        f=false;break;  
+                    }  
+                }  
+                if(f){  
+                    res=cur;  
+                    minlen=cur_len;  
+  
+                }  
+            }  
+            return;  
+        }  
+        if(minlen==cur_len) return;   //剪枝  
+        if(cur.empty()||!isdigit(cur.back())) {   //  
+            for(int i=target.size()-1;i>=pos;i--) {  
+                 string add=to_string(i-pos+1);  
+                 dfs(cur+add,cur_len+1,target,i+1,dic,res,minlen);  
+            }  
+        }  
+        dfs(cur+target[pos],cur_len+1,target,pos+1,dic,res,minlen);  
+    }  
+  
+    bool validWordAbbreviation(string word, string abbr) {
+        int lenw = word.size(), lena = abbr.size();
+        int i = 0, j = 0;
+        while(i < lenw && j < lena) {
+            if(abbr[j] >= 'a' && abbr[j] <= 'z') {
+                if(abbr[j] == word[i]) {
+                    i++;
+                    j++;
+                }else {
+                    return false;
+                }
+            }else {
+                int now = 0;
+                string nn = "";
+                while(j < lena && (abbr[j] >= '0' && abbr[j] <= '9')) {
+                    nn += abbr[j];
+                    now = now * 10 + abbr[j] - '0';
+                    j++;
+                }
+                
+                if(now == 0 || nn[0] == '0') return false;
+                i += now;
+                if(i > lenw) return false;
+            }
+        }
+        if(i < lenw || j < lena) return false;
+        return true;
+    }
+};  
+```
+
+##418. Sentence Screen Fitting
+###题目：
+Given a **rows x cols** screen and a sentence represented by a list of words, find how many times the given sentence can be fitted on the screen.
+
+Note:
+
+* A word cannot be split into two lines.
+* The order of words in the sentence must remain unchanged.
+* Two consecutive words in a line must be separated by a single space.
+* Total words in the sentence won't exceed 100.
+* Length of each word won't exceed 10.
+* 1 ≤ rows, cols ≤ 20,000.
+
+**Example 1:**
+
+```
+Input:
+rows = 2, cols = 8, sentence = ["hello", "world"]
+
+Output: 
+1
+
+Explanation:
+hello---
+world---
+
+The character '-' signifies an empty space on the screen.
+```
+**Example 2:**
+
+```
+Input:
+rows = 3, cols = 6, sentence = ["a", "bcd", "e"]
+
+Output: 
+2
+
+Explanation:
+a-bcd- 
+e-a---
+bcd-e-
+
+The character '-' signifies an empty space on the screen.
+```
+**Example 3:**
+
+```
+Input:
+rows = 4, cols = 5, sentence = ["I", "had", "apple", "pie"]
+
+Output: 
+1
+
+Explanation:
+I-had
+apple
+pie-I
+had--
+
+The character '-' signifies an empty space on the screen.
+```
+###思路：
+维护两个数组，num[i]和next[i]。
+
+num[i]:代表以第i个单词作为一行的开头，这一行能放结束几次这个句子，即找这一行有几个结尾的单词；
+
+next[i]:代表这个单词做开头放完一行之后，下一行的开头是哪个单词。
+
+维护好以上两个数组之后，只需要每一行处理一次即可。
+
+###代码：
+
+```
+int wordsTyping(vector<string>& sentence, int rows, int cols) {
+    int len = sentence.size();
+    int num[len] = {0}, next[len] = {0};
+    for(int i = 0; i < len; ++i) {
+        int now = 0, n = 0;
+        bool yes = true;
+        while(now + sentence[(i + n) % len].size() + (yes == false) <= cols) {
+            now = now + sentence[(i + n) % len].size() + (yes == false);
+            yes = false;
+            n++;
+            if((i + n) % len == 0) num[i]++;
+        }
+        next[i] = (i + n) % len;
+    }
+    
+    int res = 0, nowR = 0;
+    while(rows--) {
+        res += num[nowR];
+        nowR = next[nowR];
+    }
+    return res;
 }
 ```
 
@@ -3905,6 +4516,141 @@ bool validWordSquare(vector<string>& words) {
     return true;
 }
 ```
+##425. Word Squares
+###题目：
+Given a set of words **(without duplicates)**, find all word squares you can build from them.
+
+A sequence of words forms a valid word square if the 
+<math>
+    <msubsup><mi>k</mi> <mi></mi> <mi>th</mi></msubsup>
+</math> 
+row and column read the exact same string, where 0 ≤ k < max(numRows, numColumns).
+
+For example, the word sequence **["ball","area","lead","lady"]** forms a word square because each word reads the same both horizontally and vertically.
+
+```
+b a l l
+a r e a
+l e a d
+l a d y
+```
+**Note:**
+
+* There are at least 1 and at most 1000 words.
+* All words will have the exact same length.
+* Word length is at least 1 and at most 5.
+* Each word contains only lowercase English alphabet **a-z**.
+
+**Example 1:**
+
+```
+Input:
+["area","lead","wall","lady","ball"]
+
+Output:
+[
+  [ "wall",
+    "area",
+    "lead",
+    "lady"
+  ],
+  [ "ball",
+    "area",
+    "lead",
+    "lady"
+  ]
+]
+
+Explanation:
+The output consists of two word squares. The order of output does not matter (just the order of words in each word square matters).
+```
+**Example 2:**
+
+```
+Input:
+["abat","baba","atan","atal"]
+
+Output:
+[
+  [ "baba",
+    "abat",
+    "baba",
+    "atan"
+  ],
+  [ "baba",
+    "abat",
+    "baba",
+    "atal"
+  ]
+]
+
+Explanation:
+The output consists of two word squares. The order of output does not matter (just the order of words in each word square matters).
+```
+###思路：
+回溯的思路。
+
+试着将每一个字符串放在方阵的第一个，试下一步的方法是提取下一个应该满足的前缀，然后从所有字符串里面找到符合前缀的字符串。
+
+寻找符合前缀的字符串的方法可以是二分（首先将字符串数组排序），或者字典树。
+###代码：
+
+```
+//二分的方法：
+class Solution {
+public:
+    vector<vector<string>> res;
+    int findFirst(const vector<string>& words, string str, int n) {
+        int len = str.length();
+        int l = 0, r = n-1, mid, R = n;
+        while(l <= r) {
+            mid = (l + r) / 2;
+            if(str <= words[mid].substr(0, len)) {
+                R = mid;
+                r = mid - 1;
+            }else {
+                l = mid + 1;
+            }
+            
+        }
+        return R;
+    }
+
+    void dfs(const vector<string>& words, vector<string> path, int num, const int len, const int n) {
+        if(num >= len) {
+            res.push_back(path);
+            return;
+        }
+        string str = "";
+        for(int i = 0; i < num; ++i) {
+            str += path[i][num];
+        }
+        
+        int fir = findFirst(words, str, n);
+        while(fir < n && words[fir].substr(0, num) == str) {
+            path[num] = words[fir];
+            dfs(words, path, num + 1, len, n);
+            fir++;
+        }
+    }
+    
+    vector<vector<string>> wordSquares(vector<string>& words) {
+        int n = words.size();
+        if(n <= 0) return res;
+        int len = words[0].size();
+        
+        sort(words.begin(), words.end());
+        
+        vector<string> path(len);
+        for(int i = 0; i < n; ++i) {
+            path[0] = words[i];
+            dfs(words, path, 1, len, n);
+        }
+        return res;
+    }
+};
+```
+
 
 ##439. Ternary Expression Parser
 ###题目：
