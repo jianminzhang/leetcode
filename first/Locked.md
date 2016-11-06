@@ -2458,6 +2458,103 @@ vector<vector<int>> verticalOrder(TreeNode* root) {
     return res;
 }
 ```
+##317. Shortest Distance from All Buildings
+###题目：
+You want to build a house on an empty land which reaches all buildings in the shortest amount of distance. You can only move up, down, left and right. You are given a 2D grid of values 0, 1 or 2, where:
+
+* Each 0 marks an empty land which you can pass by freely.
+* Each 1 marks a building which you cannot pass through.
+* Each 2 marks an obstacle which you cannot pass through.
+
+For example, given three buildings at **(0,0), (0,4), (2,2)**, and an obstacle at **(0,2)**:
+
+```
+1 - 0 - 2 - 0 - 1
+|   |   |   |   |
+0 - 0 - 0 - 0 - 0
+|   |   |   |   |
+0 - 0 - 1 - 0 - 0
+```
+The point **(1,2)** is an ideal empty land to build a house, as the total travel distance of 3+3+1=7 is minimal. So return 7.
+
+**Note:**
+
+There will be at least one building. If it is not possible to build such house according to the above rules, return -1.
+
+###思路：
+使用bfs思路。
+
+建立两个二维数组，一个存储每个点能被多少个房子（为1的点）走到，一个存储从这些房子走到的最小路径长度累加和。
+
+分别从每个房子出发，进行bfs，更新以上的两个二维数组，走完所有房子，找到那个被所有房子都走到过，且路径类加和最小的点，那么就找到了最小路径和。
+
+进行bfs的时候有一些小技巧：
+
+假设现在已经处理了n个房子，第n+1个房子在bfs的时候，他可以拓展的点是那些已经被n个房子路过的点。
+
+###代码：
+
+```
+class Solution {
+
+public:
+    struct Node{
+        int x, y;
+        int depth;
+        Node(int _x, int _y, int d) : x(_x), y(_y), depth(d) {}
+    };
+    
+    int go[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    
+    int shortestDistance(vector<vector<int>>& grid) {
+        int m = grid.size();
+        if(m <= 0) return -1;
+        int n = grid[0].size();
+        
+        vector<vector<int>> visi(m, vector<int>(n, 0));
+        vector<vector<int>> cnt(m, vector<int>(n, 0));
+        int bNum = 0, res = INT_MAX;
+        for(int i = 0; i < m; ++i) {
+            for(int j = 0; j < n; ++j) {
+                if(grid[i][j] == 1) bNum++;
+            }
+        }
+        
+        int bnow = 0;
+        for(int i = 0; i < m; ++i) {
+            for(int j = 0; j < n; ++j) {
+                
+                if(grid[i][j] == 1) {
+                    bnow++;
+                    vector<vector<bool>> v(m, vector<bool>(n, false));
+                    queue<Node> Q;
+                    Q.push(Node(i, j, 0));
+                    v[i][j] = true;
+                    while(!Q.empty()) {
+                        Node tmp = Q.front();
+                        Q.pop();
+                        for(int k = 0; k < 4; ++k) {
+                            int nowx = tmp.x + go[k][0];
+                            int nowy = tmp.y + go[k][1];
+                            if(nowx >= 0 && nowx < m && nowy >= 0 && nowy < n && grid[nowx][nowy] == 0 && visi[nowx][nowy] == bnow-1 && v[nowx][nowy] == false)
+                            { 
+                                visi[nowx][nowy]++;
+                                cnt[nowx][nowy] += (tmp.depth + 1);
+                                Q.push(Node(nowx, nowy, tmp.depth + 1));
+                                v[nowx][nowy] = true;
+                                if(bnow == bNum) res = min(res, cnt[nowx][nowy]);
+                            }
+                        }
+                    }
+                    if(bnow == bNum) return res == INT_MAX ? -1 : res;
+                }
+            }
+        }
+        return res == INT_MAX ? -1 : res;
+        
+    }
+};
+```
 
 ##320. Generalized Abbreviation
 ###题目：
@@ -3003,7 +3100,97 @@ bool isReflected(vector<pair<int, int>>& points) {
     return true;
 }
 ```
+##358. Rearrange String k Distance Apart
+###题目：
+Given a non-empty string str and an integer k, rearrange the string such that the same characters are at least distance k from each other.
 
+All input strings are given in lowercase letters. If it is not possible to rearrange the string, return an empty string "".
+
+**Example 1:**
+
+```
+str = "aabbcc", k = 3
+
+Result: "abcabc"
+
+The same letters are at least distance 3 from each other.
+```
+**Example 2:**
+
+```
+str = "aaabc", k = 3 
+
+Answer: ""
+
+It is not possible to rearrange the string.
+```
+**Example 3:**
+
+```
+str = "aaadbbcc", k = 2
+
+Answer: "abacabcd"
+
+Another possible answer is: "abcabcda"
+
+The same letters are at least distance 2 from each other.
+```
+###思路：
+本质是要保证在距离k之内不能出现相同的字母，处理的思路是先处理出现个数多的那些字母。
+
+使用节点数据结构，记录字母和他相应的个数。
+
+用优先队列来存储每个节点，排序依据是先按照字母出现个数从大到小，一样的时候根据字典序，从小到大。
+
+维护还未生成的个数len，每次处理m = min(k, len)，一次处理过程中出现队列空，则返回“”，如果非空，将其头结点取出，放入答案，出现次数-1，如果次数还没有为0，那么存储在一个数组里面，处理完一次之后将临时的数组中的节点都放到优先队列中，len = len - m。
+###代码：
+
+```
+class NODE {
+public:
+    char ch;
+    int num;
+    NODE(char c, int n) : ch(c), num(n) {}
+};
+class Cmp {
+public:
+    bool operator() (NODE a, NODE b) {
+        if(a.num == b.num) return a.ch > b.ch;
+        return a.num < b.num;
+    }
+};
+
+class Solution {
+public:
+    string rearrangeString(string str, int k) {
+        string res = "";
+        int len = str.size();
+        if(k <= 1) return str;
+        unordered_map<char, int> H;
+        priority_queue<NODE, vector<NODE>, Cmp> Q;
+        for(char x : str) H[x]++; 
+        for(auto x : H) Q.push(NODE(x.first, x.second));
+        
+        while(!Q.empty()) {
+            int n = min(k, len);
+            vector<NODE> tmp;
+            while(n) {
+                if(Q.empty()) return "";
+                NODE now = Q.top();
+                Q.pop();
+                res += now.ch;
+                now.num--;
+                if(now.num > 0) tmp.push_back(now);
+                n--;
+                len--;
+            }
+            for(NODE x : tmp) Q.push(x);
+        }
+        return res;
+        
+    }
+};
+```
 
 ##359. Logger Rate Limiter
 ###题目：
@@ -3068,6 +3255,143 @@ public:
  * Logger obj = new Logger();
  * bool param_1 = obj.shouldPrintMessage(timestamp,message);
  */
+```
+
+
+##360. Sort Transformed Array
+###题目：
+Given a **sorted** array of integers nums and integer values a, b and c. Apply a function of the form *f(x) = ax2 + bx + c* to each element x in the array.
+
+The returned array must be in **sorted order**.
+
+Expected time complexity: **O(n)**
+
+**Example:**
+
+```
+nums = [-4, -2, 2, 4], a = 1, b = 3, c = 5,
+
+Result: [3, 9, 15, 33]
+
+nums = [-4, -2, 2, 4], a = -1, b = 3, c = 5
+
+Result: [-23, -5, 1, 7]
+```
+###思路：
+1、最根本的是要对fx排序，可以直接算出来，然后排序，时间复杂度是O(nlogn)。
+
+2、利用一元二次函数的性质。
+
+3、首先如果a为0的话，那么fx也是有序的，b > 0的话，本身就是升序排列，否则是降序，reverse结果即可；
+
+4、如果a不是0，那么利用抛物线的性质，-b/2a是极值点，距离极值点越远的点越大或者越小，用two pointer从两边向中间夹，根据点距离极值点的距离，按照从远到近的顺序插入结果，如果a>0，那么reverse结果即可。
+###代码：
+
+```
+int fx(int x, int a, int b, int c) {
+    return a * x * x + b * x + c;
+}
+vector<int> sortTransformedArray(vector<int>& nums, int a, int b, int c) {
+    vector<int> res;
+    int len = nums.size();
+    if(len <= 0) return res;
+    if(a == 0) {
+        for(int i = 0; i < len; ++i) {
+            res.push_back(fx(nums[i], a, b, c));
+        }
+        if(b < 0) reverse(res.begin(), res.end());
+        return res;
+    }
+    int l = 0, r = len-1;
+    double mid = -1 * (double)b / (2 * (double)a);
+    while(l <= r) {
+        double ll = fabs((double)nums[l] - mid), rr = fabs((double)nums[r] - mid);
+        if(ll > rr) {
+            res.push_back(fx(nums[l], a, b, c));
+            l++;
+        }else {
+            res.push_back(fx(nums[r], a, b, c));
+            r--;
+        }
+    }
+    if(a > 0) reverse(res.begin(), res.end());
+    return res;
+}
+```
+
+
+
+##361. Bomb Enemy
+###题目：
+Given a 2D grid, each cell is either a wall **'W'**, an enemy **'E'** or empty **'0'** (the number zero), return the maximum enemies you can kill using one bomb.
+The bomb kills all the enemies in the same row and column from the planted point until it hits the wall since the wall is too strong to be destroyed.
+Note that you can only put the bomb at an empty cell.
+
+**Example:**
+
+```
+For the given grid
+
+0 E 0 0
+E 0 W E
+0 E 0 0
+
+return 3. (Placing a bomb at (1,1) kills 3 enemies)
+```
+###思路：
+方法1：
+
+最暴力的方法：时间复杂度：O(m * n * (m+n))
+
+从每一个可以放炸弹的地方开始，向上下左右四个方向，计算最多能炸到的敌人数。
+
+方法2：
+
+DP，时间复杂度：O(m * n)
+
+维护在每个点上向上、下、左、右，四个方向最多能炸多少个敌人。
+
+###代码：
+
+```
+int maxKilledEnemies(vector<vector<char>>& grid) {
+    int m = grid.size();
+    if(m <= 0) return 0;
+    int n = grid[0].size();
+    int dp1[m+1][n+1][2], dp2[m+1][n+1][2];
+    memset(dp1, 0, sizeof(dp1));
+    memset(dp2, 0, sizeof(dp2));
+    
+    for(int i = 0; i < m; ++i) {
+        for(int j = 0; j < n; ++j) {
+            if(grid[i][j] == 'W') dp1[i+1][j+1][0] = dp1[i+1][j+1][1] = 0;
+            else {
+                dp1[i+1][j+1][0] = dp1[i+1][j][0] + (grid[i][j] == 'E');
+                dp1[i+1][j+1][1] = dp1[i][j+1][1] + (grid[i][j] == 'E');
+            }
+        }
+    }
+    
+    for(int i = m - 1; i >= 0; --i) {
+        for(int j = n - 1; j >= 0; --j) {
+            if(grid[i][j] == 'W') dp2[i][j][0] = dp2[i][j][1] = 0;
+            else {
+                dp2[i][j][0] = dp2[i][j+1][0] + (grid[i][j] == 'E');
+                dp2[i][j][1] = dp2[i+1][j][1] + (grid[i][j] == 'E');
+            }
+        }
+    }
+    int res = 0;
+    for(int i = 0; i < m; ++i) {
+        for(int j = 0; j < n; ++j) {
+            if(grid[i][j] == '0') {
+                int now = dp1[i+1][j+1][0] + dp1[i+1][j+1][1] + dp2[i][j][0] + dp2[i][j][1];
+                res = max(res, now);
+            }
+        }
+    }
+    return res;
+}
 ```
 
 ##362. Design Hit Counter
@@ -3247,6 +3571,66 @@ public:
         return res;
     }
 };
+```
+##366. Find Leaves of Binary Tree
+###题目：
+Given a binary tree, collect a tree's nodes as if you were doing this: Collect and remove all leaves, repeat until the tree is empty.
+
+**Example:**
+
+Given binary tree 
+
+```
+          1
+         / \
+        2   3
+       / \     
+      4   5    
+```
+Returns **[4, 5, 3], [2], [1]**.
+
+**Explanation:**
+
+* Removing the leaves **[4, 5, 3]** would result in this tree:
+
+```
+          1
+         / 
+        2      
+```
+* Now removing the leaf **[2]** would result in this tree:
+
+```
+          1          
+```
+* Now removing the leaf **[1]** would result in the empty tree:
+
+```
+          []         
+```
+Returns **[4, 5, 3], [2], [1]**.
+
+###思路：
+这个题的根本是求每个节点到距离他最远的叶子节点的长度，所以还是相应层数的节点值存入相应层数的结果中，dfs过程中记录层数。
+
+如果结果的大小小于等于层数，那么在结果中新建立一个vector<int>()，存入结果。
+###代码：
+
+```
+int dfs(TreeNode* root, vector<vector<int>> &res) {
+    if(!root) return -1;
+    int left = dfs(root->left, res);
+    int right = dfs(root->right, res);
+    int depth = max(left, right) + 1;
+    if(res.size() <= depth) res.push_back(vector<int>());
+    res[depth].push_back(root->val);
+    return depth;
+}
+vector<vector<int>> findLeaves(TreeNode* root) {
+    vector<vector<int>> res;
+    int d = dfs(root, res);
+    return res;
+}
 ```
 
 ##369. Plus One Linked List

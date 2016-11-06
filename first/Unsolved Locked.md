@@ -72,35 +72,6 @@ sumRegion(2, 1, 4, 3) -> 10
 
 
 
-##317. Shortest Distance from All Buildings
-###题目：
-You want to build a house on an empty land which reaches all buildings in the shortest amount of distance. You can only move up, down, left and right. You are given a 2D grid of values 0, 1 or 2, where:
-
-* Each 0 marks an empty land which you can pass by freely.
-* Each 1 marks a building which you cannot pass through.
-* Each 2 marks an obstacle which you cannot pass through.
-
-For example, given three buildings at **(0,0), (0,4), (2,2)**, and an obstacle at **(0,2)**:
-
-```
-1 - 0 - 2 - 0 - 1
-|   |   |   |   |
-0 - 0 - 0 - 0 - 0
-|   |   |   |   |
-0 - 0 - 1 - 0 - 0
-```
-The point **(1,2)** is an ideal empty land to build a house, as the total travel distance of 3+3+1=7 is minimal. So return 7.
-
-**Note:**
-
-There will be at least one building. If it is not possible to build such house according to the above rules, return -1.
-
-###思路：
-
-###代码：
-
-
-
 ##351. Android Unlock Patterns
 ###题目：
 Given an Android **3x3** key lock screen and two integers m and n, where 1 ≤ m ≤ n ≤ 9, count the total number of unlock patterns of the Android lock screen, which consist of minimum of m keys and maximum n keys.
@@ -202,134 +173,6 @@ snake.move("U"); -> Returns -1 (Game over because snake collides with border)
 ###代码：
 
 
-##358. Rearrange String k Distance Apart
-###题目：
-Given a non-empty string str and an integer k, rearrange the string such that the same characters are at least distance k from each other.
-
-All input strings are given in lowercase letters. If it is not possible to rearrange the string, return an empty string "".
-
-**Example 1:**
-
-```
-str = "aabbcc", k = 3
-
-Result: "abcabc"
-
-The same letters are at least distance 3 from each other.
-```
-**Example 2:**
-
-```
-str = "aaabc", k = 3 
-
-Answer: ""
-
-It is not possible to rearrange the string.
-```
-**Example 3:**
-
-```
-str = "aaadbbcc", k = 2
-
-Answer: "abacabcd"
-
-Another possible answer is: "abcabcda"
-
-The same letters are at least distance 2 from each other.
-```
-###思路：
-###代码：
-
-
-
-##360. Sort Transformed Array
-###题目：
-Given a **sorted** array of integers nums and integer values a, b and c. Apply a function of the form *f(x) = ax2 + bx + c* to each element x in the array.
-
-The returned array must be in **sorted order**.
-
-Expected time complexity: **O(n)**
-
-**Example:**
-
-```
-nums = [-4, -2, 2, 4], a = 1, b = 3, c = 5,
-
-Result: [3, 9, 15, 33]
-
-nums = [-4, -2, 2, 4], a = -1, b = 3, c = 5
-
-Result: [-23, -5, 1, 7]
-```
-###思路：
-###代码：
-
-##361. Bomb Enemy
-###题目：
-Given a 2D grid, each cell is either a wall **'W'**, an enemy **'E'** or empty **'0'** (the number zero), return the maximum enemies you can kill using one bomb.
-The bomb kills all the enemies in the same row and column from the planted point until it hits the wall since the wall is too strong to be destroyed.
-Note that you can only put the bomb at an empty cell.
-
-**Example:**
-
-```
-For the given grid
-
-0 E 0 0
-E 0 W E
-0 E 0 0
-
-return 3. (Placing a bomb at (1,1) kills 3 enemies)
-```
-###思路：
-###代码：
-
-
-
-
-##366. Find Leaves of Binary Tree
-###题目：
-Given a binary tree, collect a tree's nodes as if you were doing this: Collect and remove all leaves, repeat until the tree is empty.
-
-**Example:**
-
-Given binary tree 
-
-```
-          1
-         / \
-        2   3
-       / \     
-      4   5    
-```
-Returns **[4, 5, 3], [2], [1]**.
-
-**Explanation:**
-
-* Removing the leaves **[4, 5, 3]** would result in this tree:
-
-```
-          1
-         / 
-        2      
-```
-* Now removing the leaf **[2]** would result in this tree:
-
-```
-          1          
-```
-* Now removing the leaf **[1]** would result in the empty tree:
-
-```
-          []         
-```
-Returns **[4, 5, 3], [2], [1]**.
-
-###思路：
-
-###代码：
-
-
 ##379. Design Phone Directory **
 ###题目：
 Design a Phone Directory which supports the following operations:
@@ -394,7 +237,9 @@ Each **number** or letter in the abbreviation is considered length = 1. For exam
 "apple", ["plain", "amber", "blade"] -> "1p3" (other valid answers include "ap3", "a3e", "2p2", "3le", "3l1").
 ```
 ###思路：
+
 ###代码：
+
 
 ##418. Sentence Screen Fitting
 ###题目：
