@@ -87,6 +87,73 @@ vector<string> generateParenthesis(int n) {
     return res;
 }
 ```
+##37. Sudoku Solver
+###题目：
+Write a program to solve a Sudoku puzzle by filling the empty cells.
+
+Empty cells are indicated by the character '.'.
+
+You may assume that there will be only one unique solution.
+###思路：
+用三个二维数组分别记录每行、每列和每个小方格中1-9的使用情况；
+
+初始状态已经填写的数字要首先赋值；
+
+后面回溯遍历每种情况时再修改和恢复原状；
+
+当这个棋盘都填完之后，即可返回。
+###代码：
+
+```
+class Solution {
+public:
+    bool dfs(vector<vector<char>>& board, int x, int y) {
+        if(x > 8) {
+            res = board;
+            return true;
+        }
+        int xx = x, yy = y;
+        if(y > 7) xx = x+1, yy = 0;
+        else yy = y+1;
+        if(board[x][y] != '.') {
+            if(dfs(board, xx, yy)) return true;
+            else return false;
+        }
+        
+        for(int i = 0; i < 9; ++i) {
+            if(r[x][i] || c[y][i] || b[(x/3)*3+y/3][i]) continue;
+            r[x][i] = c[y][i] = b[(x/3)*3+y/3][i] = true;
+            board[x][y] = i + '1';
+            if(dfs(board, xx, yy)) return true;
+            board[x][y] = '.';
+            r[x][i] = c[y][i] = b[(x/3)*3+y/3][i] = false;
+        }
+        return false;
+    }
+    
+    void solveSudoku(vector<vector<char>>& board) {
+        memset(r, false, sizeof(r));
+        memset(c, false, sizeof(c));
+        memset(b, false, sizeof(b));
+        for(int i = 0; i < 9; ++i)
+            for(int j = 0; j < 9; ++j) 
+                if(board[i][j] != '.') {
+                    int now = board[i][j] - '0';
+                    r[i][now-1] = true;
+                    c[j][now-1] = true;
+                    b[(i/3)*3+j/3][now-1] = true;
+                    
+                }
+        res.clear();
+        dfs(board, 0, 0);
+        board = res;
+    }
+private:
+    bool r[9][9], c[9][9], b[9][9];
+    vector<vector<char>> res;
+};
+```
+
 ##39. Combination Sum
 ###题目：
 Given a set of candidate numbers (**C**) and a target number (**T**), find all unique combinations in **C** where the candidate numbers sums to **T**.
@@ -376,6 +443,112 @@ vector<vector<int>> permuteUnique(vector<int>& nums) {
     return res;
 }
 ```
+##60. Permutation Sequence
+###题目：
+The set [1,2,3,…,n] contains a total of n! unique permutations.
+
+By listing and labeling all of the permutations in order,
+We get the following sequence (ie, for n = 3):
+
+
+1. "123"
+2. "132"
+3. "213"
+4. "231"
+5. "312"
+6. "321"
+
+Given n and k, return the kth permutation sequence.
+
+Note: Given n will be between 1 and 9 inclusive.
+###思路：
+
+###代码：
+
+```
+void dfs(vector<int> &num, int per, int k, string &res) {
+    if(num.empty()) return;
+    per /= num.size();
+    int now = k / per;
+    res += to_string(num[now]);
+    num.erase(num.begin() + now);
+    dfs(num, per, k % per, res);
+}
+
+string getPermutation(int n, int k) {
+    string res = "";
+    int per = 1;
+    for(int i = 2; i <= n; ++i) per *= i;
+    vector<int> num(n);
+    for(int i = 0; i < n; ++i) num[i] = i+1;
+    dfs(num, per, k-1, res);
+    return res;
+}
+```
+
+##51. N-Queens
+###题目：
+The n-queens puzzle is the problem of placing n queens on an n×n chessboard such that no two queens attack each other.
+
+Given an integer n, return all distinct solutions to the n-queens puzzle.
+
+Each solution contains a distinct board configuration of the n-queens' placement, where 'Q' and '.' both indicate a queen and an empty space respectively.
+
+For example,
+
+There exist two distinct solutions to the 4-queens puzzle:
+
+```
+[
+ [".Q..",  // Solution 1
+  "...Q",
+  "Q...",
+  "..Q."],
+
+ ["..Q.",  // Solution 2
+  "Q...",
+  "...Q",
+  ".Q.."]
+]
+```
+###思路：
+n皇后问题的对角线攻击不只是指主对角线或者副对角线。
+###代码：
+
+```
+class Solution {
+public:
+    void dfs(int n, vector<string> &path, int index) {
+        if(index >= n) {
+            res.push_back(path);
+            return;
+        }
+        for(int i = 0; i < n; ++i) {
+            if(c[i] || d1[index-i+n] || d2[index+i]) continue;
+            c[i] = d1[index-i+n] = d2[index+i] = true;
+            path[index][i] = 'Q';
+            dfs(n, path, index+1);
+            path[index][i] = '.';
+            c[i] = d1[index-i+n] = d2[index+i] = false;
+        }
+    }
+    
+    vector<vector<string>> solveNQueens(int n) {
+        c = vector<bool>(n, false);
+        d1 = vector<bool>(2 * n, false);
+        d2 = vector<bool>(2 * n, false);
+        
+        string each = "";
+        for(int i = 0; i < n; ++i) each += '.';
+        vector<string> path(n, each); 
+        dfs(n, path, 0);
+        return res;
+    }
+private:
+    vector<vector<string>> res;
+    vector<bool> c, d1, d2;
+};
+```
 
 ##78. Subsets
 ###题目：
@@ -474,6 +647,155 @@ vector<vector<int>> subsetsWithDup(vector<int>& nums) {
 }
 ```
 
+##77. Combinations
+###题目：
+Given two integers n and k, return all possible combinations of k numbers out of 1 ... n.
+
+For example,
+
+If n = 4 and k = 2, a solution is:
+
+```
+[
+  [2,4],
+  [3,4],
+  [2,3],
+  [1,2],
+  [1,3],
+  [1,4],
+]
+```
+###思路：
+
+###代码：
+
+```
+void dfs(const int n, int k, int j, vector<vector<int>> &res, vector<int> &path, vector<bool> &yes) {
+    if(k == 0) {
+        res.push_back(path);
+        return;
+    }
+    else {
+        for(int i = j; i <= n; ++i) {
+            if(yes[i] == false) {
+                path.push_back(i);
+                yes[i] = true;
+                dfs(n, k - 1, i + 1, res, path, yes);
+                path.pop_back();
+                yes[i] = false;
+            }
+        }
+    }
+}
+
+vector<vector<int>> combine(int n, int k) {
+    vector<vector<int>> res;
+    vector<int> path;
+    vector<bool> yes(n + 1, false);
+    dfs(n, k, 1, res, path, yes);
+    return res;
+}
+```
+
+
+##79. Word Search
+###题目：
+Given a 2D board and a word, find if the word exists in the grid.
+
+The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those horizontally or vertically neighboring. The same letter cell may not be used more than once.
+
+For example,
+Given **board** =
+
+```
+[
+  ['A','B','C','E'],
+  ['S','F','C','S'],
+  ['A','D','E','E']
+]
+```
+word = **"ABCCED"**, -> returns **true**,
+word = **"SEE"**, -> returns **true**,
+word = **"ABCB"**, -> returns **false**.
+###思路：
+dfs 
+###代码：
+
+```
+bool dfs(vector<vector<char>>& board, string &word, int num, int i, int j, int R, int C, int W) {
+    char now = board[i][j];
+    bool yes = false;
+    if(now != word[num]) return false;
+    if(num == W-1) return true;
+    board[i][j] = '#';
+    if(i > 0) yes = dfs(board, word, num+1, i-1, j, R, C, W);
+    if(!yes && i < R-1) yes = dfs(board, word, num+1, i+1, j, R, C, W);
+    if(!yes && j < C-1) yes = dfs(board, word, num+1, i, j+1, R, C, W);
+    if(!yes && j > 0) yes = dfs(board, word, num+1, i, j-1, R, C, W);
+    board[i][j] = now;
+    return yes;
+   
+}
+
+bool exist(vector<vector<char>>& board, string word) {
+    int R = board.size(), C = board[0].size(), W = word.size();
+    int i, j;
+    if(R && C && W) {
+        for (i = 0; i < R; ++i) 
+            for (j = 0; j < C; ++j) 
+                if(dfs(board, word, 0, i, j, R, C, W))
+                    return true;
+    }
+    
+    return false;
+}
+```
+
+##89. Gray Code
+###题目：
+The gray code is a binary numeral system where two successive values differ in only one bit.
+
+Given a non-negative integer n representing the total number of bits in the code, print the sequence of gray code. A gray code sequence must begin with 0.
+
+For example, given *n* = 2, return **[0,1,3,2]**. Its gray code sequence is:
+
+```
+00 - 0
+01 - 1
+11 - 3
+10 - 2
+```
+**Note:**
+
+For a given n, a gray code sequence is not uniquely defined.
+
+For example, **[0,2,3,1]** is also a valid gray code sequence according to the above definition.
+
+For now, the judge is able to judge based on one instance of gray code sequence. Sorry about that.
+###思路：
+要按照顺序。
+###代码：
+
+```
+void rec(int start_i, int end_i, int zero_or_one_first, int power, vector<int>* result) {
+    if (power < 0) return;
+    int mid = (start_i + end_i) / 2;
+    int add = (int) pow(2, power);
+    if (zero_or_one_first == 0) {
+        for (int i = mid+1; i <= end_i; i++) (*result)[i] += add;
+    } else {
+        for (int i = start_i; i <= mid; i++) (*result)[i] += add;
+    }
+    rec(start_i, mid, 0, power-1, result);
+    rec(mid+1, end_i, 1, power-1, result);
+}
+vector<int> grayCode(int n) {
+    vector<int> result((int) pow(2, n), 0);
+    rec(0, (int) pow(2, n) - 1, 0, n-1, &result);
+    return result;
+}
+```
+
 ##93. Restore IP Addresses
 ###题目：
 Given a string containing only digits, restore it by returning all possible valid IP address combinations.
@@ -526,6 +848,125 @@ vector<string> restoreIpAddresses(string s) {
 }
 ```
 
+##126. Word Ladder II
+###题目：
+Given two words (beginWord and endWord), and a dictionary's word list, find all shortest transformation sequence(s) from beginWord to endWord, such that:
+
+1. Only one letter can be changed at a time
+2. Each intermediate word must exist in the word list
+
+For example,
+
+Given:
+
+*beginWord* = **"hit"**
+
+*endWord* = **"cog"**
+
+*wordList* = **["hot","dot","dog","lot","log"]**
+
+Return
+
+```
+  [
+    ["hit","hot","dot","dog","cog"],
+    ["hit","hot","lot","log","cog"]
+  ]
+```
+**Note:**
+
+* All words have the same length.
+* All words contain only lowercase alphabetic characters.
+
+###思路：
+
+###代码：
+
+```
+struct NODE {
+    string s;
+    int t;
+    NODE() {}
+    NODE(string _s, int _t) : s(_s), t(_t) {}
+};
+
+class Solution {
+public:
+    void BFS(string beginWord, unordered_set<string> &wordList) {
+        queue<NODE> Q;
+        dis[beginWord] = 0;
+        Q.push(NODE(beginWord, 0));
+        int len = beginWord.size();
+        while(!Q.empty()) {
+            NODE tmp = Q.front();
+            Q.pop();
+            string nowW = tmp.s;
+            int nowT = tmp.t;
+            for(int i = 0; i < len; ++i) {
+                for(int j = 0; j < 26; ++j) {
+                    if(nowW[i] - 'a' == j) continue;
+                    nowW[i] = j + 'a';
+                    if(wordList.find(nowW) != wordList.end()) {
+                        if(dis.find(nowW) != dis.end()) {
+                            nowW[i] = tmp.s[i];
+                            continue;
+                        }
+                        dis[nowW] = nowT + 1;
+                        Q.push(NODE(nowW, nowT+1));
+                    }
+                    nowW[i] = tmp.s[i];
+                }
+            }
+        }
+    }
+
+    void dfs(int l, vector<string> path, string now, const int len) {
+        if(l == 0) {
+            reverse(path.begin(), path.end());
+            res.push_back(path);
+            return;
+        }
+        
+        for(string can : level[l-1]) {
+            int diff = 0;
+            for(int i = 0; i < len; ++i) {
+                if(now[i] != can[i]) diff++;
+            }
+            if(diff != 1) continue;
+            path.push_back(can);
+            dfs(l-1, path, can, len);
+            path.pop_back();
+        }
+    }
+
+    vector<vector<string>> findLadders(string beginWord, string endWord, unordered_set<string> &wordList) {
+        res.clear();
+        dis.clear();
+        wordList.insert(beginWord);
+        wordList.insert(endWord);
+        
+        BFS(beginWord, wordList);
+        
+        if (dis.find(endWord) == dis.end()) return res;
+        level = vector<vector<string>>(dis[endWord] + 1);
+        for (auto w : wordList) {
+            if (dis.find(w) == dis.end() || dis[w] > dis[endWord]) continue;
+            level[dis[w]].push_back(w);
+        }
+        int allL = dis[endWord];
+        int len = beginWord.size();
+        
+        vector<string> path;
+        path.push_back(endWord);
+        dfs(allL, path, endWord, len);
+        return res;
+    }
+private:
+    unordered_map<string, int> dis;
+    vector<vector<string>> level;
+    vector<vector<string>> res;
+};
+```
 
 ##131. Palindrome Partitioning
 ###题目：
@@ -548,7 +989,105 @@ Return
 ###代码：
 
 ```
+bool isPalindrome (string &s, int l, int r) {
+    while(l <= r) {
+        if(s[l] != s[r]) return false;
+        ++l; --r;
+    }
+    return true;
+}
+void dfs(string &s, const int len, int index, vector<vector<string>> &res, vector<string> &path) {
+    if(index == len) {
+        res.push_back(path);
+        return;
+    }
+    for(int r = index; r < len; ++r) {
+        if(isPalindrome (s, index, r)) {
+            path.push_back(s.substr(index, r-index+1));
+            dfs(s, len, r+1, res, path);
+            path.pop_back();
+        }
+    }
+}
+vector<vector<string>> partition(string s) {
+    int len = s.size();
+    vector<vector<string>> res;
+    if(len == 0) {
+        return res;
+    }
+    vector<string> path;
+    dfs(s, len, 0, res, path);
+    return res;
+}
+```
+##140. Word Break II
+###题目：
+Given a string s and a dictionary of words dict, add spaces in s to construct a sentence where each word is a valid dictionary word.
 
+Return all such possible sentences.
+
+For example, given
+
+s = **"catsanddog"**,
+
+dict = **["cat", "cats", "and", "sand", "dog"]**.
+
+A solution is **["cats and dog", "cat sand dog"]**.
+###思路：
+首先用bool dp[i]数组维护0-len位置前切开是否前面可以有答案。这里数组值一旦变为true即可break,可以提高速度。
+
+然后从后向前进行回溯，回溯使用dp数组，判断从len向前的某些切割组合可以得到答案，成立的判断标准是两个相邻切割中间形成的字符串在字典中。
+###代码：
+
+```
+class Solution {
+public:
+    void Dp(string &s, unordered_set<string>& wordDict, const int len) {
+        for (int i = 1; i <= len; ++i) {
+            for(int j = i-1; j >= 0; --j) {
+                string now = s.substr(j, i-j);
+                if(dp[j] && wordDict.find(now) != wordDict.end()) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    void dfs(string &s, int index, unordered_set<string>& wordDict, vector<string> &path) {
+        if(index == 0) {
+            int n = path.size();
+            string now = "";
+            for(int i = n-1; i > 0; --i) {
+                now = now + path[i] + " ";
+            }
+            now += path[0];
+            res.push_back(now);
+            return;
+        }
+        for(int i = index-1; i >= 0; --i) {
+            string nn = s.substr(i, index-i);
+            if(dp[i] && wordDict.find(nn) != wordDict.end()) {
+                path.push_back(nn);
+                dfs(s, i, wordDict, path);
+                path.pop_back();
+            }
+        }
+    }
+
+    vector<string> wordBreak(string s, unordered_set<string>& wordDict) {
+        int len = s.size();
+        dp = vector<bool>(len+1, false);
+        dp[0] = true;
+        Dp(s, wordDict, len);
+        vector<string> path;
+        dfs(s, len, wordDict, path);
+        return res;
+    }
+private:
+    vector<bool> dp;
+    vector<string> res;
+};
 ```
 
 ##357. Count Numbers with Unique Digits
@@ -584,6 +1123,66 @@ int countNumbersWithUniqueDigits(int n) {
     res += countNumbersWithUniqueDigits(n-1);
     return res;
 }
+```
+##401. Binary Watch
+###题目：
+A binary watch has 4 LEDs on the top which represent the hours **(0-11)**, and the 6 LEDs on the bottom represent the minutes **(0-59)**.
+
+Each LED represents a zero or one, with the least significant bit on the right.
+
+For example, the above binary watch reads "3:25".
+
+Given a non-negative integer n which represents the number of LEDs that are currently on, return all possible times the watch could represent.
+
+**Example:**
+
+```
+Input: n = 1
+Return: ["1:00", "2:00", "4:00", "8:00", "0:01", "0:02", "0:04", "0:08", "0:16", "0:32"]
+```
+**Note:**
+
+* The order of output does not matter.
+* The hour must not contain a leading zero, for example "01:00" is not valid, it should be "1:00".
+* The minute must be consist of two digits and may contain a leading zero, for example "10:2" is not valid, it should be "10:02".
+
+###思路：
+将代表小时和分钟的部分拼起来，初始值所有位都是0，枚举所有num个位数为1的情况，并且计算出符合小时和分钟表示的情况。
+###代码：
+
+```
+class Solution {
+public:
+    void dfs(int num, int index, vector<int> &tmpNum) {
+        if(num == 0) {
+            if(index > 10) return;
+            int h = 0;
+            for(int i = 0; i < 4; ++i) {
+                h = h * 2 + tmpNum[i] % 2;
+            }
+            int m = 0;
+            for(int i = 4; i < 10; ++i) {
+                m = m * 2 + tmpNum[i] % 2;
+            }
+            if(h < 12 && m < 60)
+                res.push_back(to_string(h) + ":" + (m < 10 ? "0" : "") + to_string(m));
+            return;
+        }
+        for(int i = index; i < 10; ++i) {
+            tmpNum[i] = 1;
+            dfs(num-1, i+1, tmpNum);
+            tmpNum[i] = 0;
+        }
+    }
+    vector<string> readBinaryWatch(int num) {
+        vector<int> tmpNum = vector<int>(10, 0);
+        res.clear();
+        dfs(num, 0, tmpNum);
+        return res;
+    }
+private:
+    vector<string> res;
+};
 ```
 
 
