@@ -848,6 +848,86 @@ vector<string> restoreIpAddresses(string s) {
 }
 ```
 
+##127. Word Ladder
+###题目：
+Given two words (beginWord and endWord), and a dictionary's word list, find the length of shortest transformation sequence from beginWord to endWord, such that:
+
+Only one letter can be changed at a time
+Each intermediate word must exist in the word list
+
+For example,
+
+Given:
+*beginWord* = **"hit"**
+
+*endWord* = **"cog"**
+
+*wordList* = **["hot","dot","dog","lot","log"]**
+
+As one shortest transformation is **"hit" -> "hot" -> "dot" -> "dog" -> "cog"**,
+
+return its length **5**.
+
+Note:
+
+* Return 0 if there is no such transformation sequence.
+* All words have the same length.
+* All words contain only lowercase alphabetic characters.
+
+###思路：
+首先注意读题，和下面的题有点区别，开始单词本身的距离是1
+
+只需要下一个题的BFS即可。
+
+BFS的时候需要用回溯，要尝试所有替换方式，试过一种之后要还原。
+###代码：
+
+```
+struct NODE {
+    string s;
+    int t;
+    NODE() {}
+    NODE(string _s, int _t) : s(_s), t(_t) {}
+};
+
+class Solution {
+public:
+    int ladderLength(string beginWord, string endWord, unordered_set<string>& wordList) {
+        wordList.insert(beginWord);
+        wordList.insert(endWord);
+        unordered_map<string, int> hash;
+        hash[beginWord] = 1;
+        queue<NODE> Q;
+        Q.push(NODE(beginWord, 1));
+        int len = beginWord.size();
+        while(!Q.empty()) {
+            NODE now = Q.front();
+            string nows = now.s;
+            int nowt = now.t;
+            Q.pop();
+            if(nows == endWord) {
+                return nowt;
+            }
+            for(int i = 0; i < len; ++i) {
+                for(char j = 'a'; j <= 'z'; ++j) {
+                    if(nows[i] == j) continue;
+                    nows[i] = j;
+                    if(wordList.find(nows) == wordList.end() || hash.find(nows) != hash.end()) {
+                        nows[i] = now.s[i];
+                        continue;
+                    }
+                    Q.push(NODE(nows, nowt+1));
+                    hash[nows] = nowt+1;
+                    nows[i] = now.s[i];
+                }
+            }
+        }
+        return 0;
+    }
+};
+```
+
+
 ##126. Word Ladder II
 ###题目：
 Given two words (beginWord and endWord), and a dictionary's word list, find all shortest transformation sequence(s) from beginWord to endWord, such that:

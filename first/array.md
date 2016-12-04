@@ -71,6 +71,42 @@ lower_bound(nums.begin(), nums.end(), target) - nums.begin();
 ##57. Insert Interval
 一定保证最后是有序的，开始已经按照start排序。
 
+##84. Largest Rectangle in Histogram
+###题目：
+Given n non-negative integers representing the histogram's bar height where the width of each bar is 1, find the area of largest rectangle in the histogram.
+
+For example,
+
+Given heights = **[2,1,5,6,2,3]**,
+
+return **10**.
+###思路：
+用栈存储一个范围内的最小值。
+
+当前值大于等于栈顶的时候，加入栈。
+
+否则更新答案。
+###代码：
+
+```
+int largestRectangleArea(vector<int>& heights) {
+    int len = heights.size();
+    int res = 0;
+    if (len == 0) return res;
+    stack<int> mini;
+    heights.push_back(0);
+    int i = 0;
+    while (i <= len) {
+        if (mini.empty() || heights[i] >= heights[mini.top()]) mini.push(i++);
+        else {
+            int now = mini.top();
+            mini.pop();
+            res = max(res, heights[now] * (mini.empty() ? i : i - mini.top() - 1));
+        }
+    }
+    return res;
+}
+```
 
 ##121. Best Time to Buy and Sell Stock
 维护一个前i个位置的时候的最小值，用当前位置的值减去最小值，与最大结果对比，如果大即更新。

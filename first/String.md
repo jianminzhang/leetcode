@@ -625,7 +625,6 @@ Given encoded message **"12"**, it could be decoded as **"AB"** (1 2) or **"L"**
 The number of ways decoding **"12"** is 2.
 ###思路：
 动态规划思路。
-方法1：从前向后遍历：
 
 **状态 f[i]：** 
 
