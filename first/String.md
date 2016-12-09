@@ -1067,6 +1067,40 @@ private:
     }
 };
 ```
+
+##434. Number of Segments in a String
+###题目：
+Count the number of segments in a string, where a segment is defined to be a contiguous sequence of non-space characters.
+
+Please note that the string does not contain any **non-printable** characters.
+
+**Example:**
+
+```
+Input: "Hello, my name is John"
+Output: 5
+```
+###思路：
+注意第一个if的中括号不可以去掉，否则程序会认为 else 是第二个 if 对应
+###代码：
+
+```
+int countSegments(string s) {
+    s = s + " ";
+    int res = 0, len = s.size();
+    string now = "";
+    for (int i = 0; i < len; ++i) 
+        if (s[i] == ' ') {
+            if (now != "") {
+                res++;
+                now = "";
+            }
+        }
+        else now = now + s[i];
+    return res;
+}
+```
+
 ##459. Repeated Substring Pattern
 ###题目：
 Given a non-empty string check if it can be constructed by taking a substring of it and appending multiple copies of the substring together. You may assume the given string consists of lowercase English letters only and its length will not exceed 10000.

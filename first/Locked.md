@@ -300,7 +300,6 @@ int shortestDistance(vector<string>& words, string word1, string word2) {
             hash[word1] = i;
             if(hash[word2] != -1) {
                 res = min(res, hash[word1] - hash[word2]);
-                
             }
         }else if(words[i] == word2){
             hash[word2] = i;

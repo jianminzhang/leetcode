@@ -174,7 +174,7 @@ int searchInsert(vector<int>& nums, int target) {
 ###题目：
 Implement pow(x, n).
 ###思路：
-首先处理次数，一定要用无符号的long long 来保存，否则有可能超过范围。
+首先处理次数，一定要用long long 来保存，否则有可能超过范围，但是一定要强制类型转换。
 
 处理次数的同时，如果次数为负数，则底数变为倒数。
 
@@ -185,10 +185,10 @@ Implement pow(x, n).
 ```
 double myPow(double x, int n) {
     double res = 1;
-    unsigned long long p;
+    long long p;
     if(n == 0) return 1;
     if(n < 0) {
-        p = -n;
+        p = -(long long)n;//强制类型转换，否则不可以
         x = 1 / x;
     }else {
         p = n;
@@ -257,6 +257,8 @@ Given target = 3, return true.
 先在第一列中二分，找到最后一个行首比目标值小的那一行；
 
 然后再在那一行中二分，确定是否存在。
+
+可以将二维转换成一维
 ###代码：
 
 ```
@@ -581,7 +583,7 @@ public:
 };
 ```
 
-##300. Longest Increasing Subsequence
+##300. Longest Increasing Subsequence *
 ###题目：
 Given an unsorted array of integers, find the length of longest increasing subsequence.
 
@@ -607,6 +609,7 @@ Your algorithm should run in O(n2) complexity.
 
 主要思路就是维护一个数组res来记录最长的连续串。从左向右遍历数组，如果nums[i]比res中所有数组都大，那么将其添加在最后，否则将其替换res中第一个大于等于他的位置上的数字，酱紫不会使原来的答案数组不成立，但是会给后面的数字有更多可能。
 
+res[i]记录的是 长度是i+1的LIS最后一位的最小值。
 ###代码：
 
 ```
@@ -631,9 +634,9 @@ int lengthOfLIS(vector<int>& nums) {
 //方法2：
 int lengthOfLIS(vector<int>& nums) {
     vector<int> res;
-    for(int i=0; i<nums.size(); i++) {
-        auto it = std::lower_bound(res.begin(), res.end(), nums[i]);
-        if(it==res.end()) res.push_back(nums[i]);
+    for(int i = 0; i < nums.size(); i++) {
+        auto it = lower_bound(res.begin(), res.end(), nums[i]);
+        if(it == res.end()) res.push_back(nums[i]);
         else *it = nums[i];
     }
     return res.size();
@@ -745,7 +748,7 @@ public:
     }
 };
 ```
-##378. Kth Smallest Element in a Sorted Matrix*
+##378. Kth Smallest Element in a Sorted Matrix**
 ###题目：
 Given a n x n matrix where each of the rows and columns are sorted in ascending order, find the kth smallest element in the matrix.
 
@@ -767,7 +770,11 @@ return 13.
 
 You may assume k is always valid, 1 ≤ k ≤ n2.
 ###思路：
-如何保证 l 在原矩阵中……
+首先这个模板求得是满足条件的最左边界的位置；
+
+然后条件是找出matrix中小于等于value的个数等于k的value，符合这个条件的数是matrix中【第k数-第k+1个数）左闭右开；
+
+我们找到的是符合这个条件的最小的数，所以这个数一定是第k个数，是存在于矩阵中的。
 ###代码：
 
 ```
@@ -819,6 +826,15 @@ If there are lots of incoming S, say S1, S2, ... , Sk where k >= 1B, and you wan
 
 两个指针分别遍历s和t。
 
+follow up:
+
+首先用一个hash来记录t字符串中所有字符出现的位置；
+
+然后遍历每一个s串，pre代表s[i]可以从t[pre]及之后的字母中查找。
+
+如果hash中不存在s[i]，返回false;
+
+如果hash[s[i]]大于等于pre的位置不存在，那么返回false,说明在t中合适的位置已经没有s的相应字母
 ###代码：
 
 ```
