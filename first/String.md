@@ -563,6 +563,89 @@ string addBinary(string a, string b) {
     return s;
 }
 ```
+
+##68. Text Justification
+###题目：
+Given an array of words and a length *L*, format the text such that each line has exactly *L* characters and is fully (left and right) justified.
+
+You should pack your words in a greedy approach; that is, pack as many words as you can in each line. Pad extra spaces ' ' when necessary so that each line has exactly *L* characters.
+
+Extra spaces between words should be distributed as evenly as possible. If the number of spaces on a line do not divide evenly between words, the empty slots on the left will be assigned more spaces than the slots on the right.
+
+For the last line of text, it should be left justified and no extra space is inserted between words.
+
+For example,
+
+**words: ["This", "is", "an", "example", "of", "text", "justification."]**
+
+**L: 16.**
+
+Return the formatted lines as:
+
+```
+[
+   "This    is    an",
+   "example  of text",
+   "justification.  "
+]
+```
+**Note:** Each word is guaranteed not to exceed *L* in length.
+###思路：
+思路很简单，就是按照题目要求只要可以排列开就在一行排尽量多的单词。依次将所有单词排入
+
+主要是空格个数的计算。
+
+在排列过程中，通过计算字母个数，确定一行的起始和终止单词，然后确定每个单词中间空格的数目，由于不一定可能整除，前几个间隙空格数可能比后面多一个。
+
+这里有2个例外：
+
+1、最后一行前面每两个单词之间只有一个空格；
+
+2、前面的如果一行只能放下一个单词，单词靠左放置，后面多余出来的空间放空格。
+###代码：
+
+```
+vector<string> fullJustify(vector<string>& words, int maxWidth) {
+    int len = words.size();
+    vector<string> res;
+    if (!len) return res;
+    int i = 0;
+    while (i < len) {
+        int start = i, end = i;
+        int num = words[i++].size();
+        while (i < len && num + (int)words[i].size() + 1 <= maxWidth) {
+            num = num + (int)words[i].size() + 1;
+            i++;
+        }
+        end = i - 1;
+        int gaps = end - start;
+        int ava = 0, re = 0;
+        if (gaps) {
+            ava = (maxWidth - num) / gaps;
+            re = (maxWidth - num) % gaps;
+        }
+        string now = "";
+        for (int j = start; j < end; ++j) {
+            now += words[j];
+            if (end == len-1) now.append(1, ' ');
+            else {
+                now.append(ava + 1, ' ');
+                if (re) {
+                    now.append(1, ' ');
+                    --re;
+                }
+            }
+        }
+        now += words[end];
+        if ((int)now.size() < maxWidth) now.append(maxWidth-(int)now.size(), ' ');
+        res.push_back(now);
+    }
+    return res;
+}
+```
+
+
+
 ##71. Simplify Path
 ###题目：
 Given an absolute path for a file (Unix-style), simplify it.

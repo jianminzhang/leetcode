@@ -33,6 +33,7 @@ void init() {
 void getAll(const string digits, const int n, int i, vector<string> &res, string path) {
     if(i >= n) {
         res.push_back(path);
+        return;
     }
     string now = hash[digits[i]];
     int len = now.size();
@@ -216,8 +217,10 @@ Given a collection of candidate numbers (C) and a target number (T), find all un
 Each number in C may only be used once in the combination.
 
 Note:
-All numbers (including target) will be positive integers.
-The solution set must not contain duplicate combinations.
+
+* All numbers (including target) will be positive integers.
+* The solution set must not contain duplicate combinations.
+
 For example, given candidate set [10, 1, 2, 7, 6, 1, 5] and target 8, 
 A solution set is: 
 
@@ -232,7 +235,7 @@ A solution set is:
 ###思路：
 这个题和上题不一样之处在于每个位置的数字只能用一次
 
-且要求保证不重复
+且要求保证不重复，这里相同值得数字是相同对待的
 ###代码：
 
 ```
@@ -670,33 +673,25 @@ If n = 4 and k = 2, a solution is:
 ###代码：
 
 ```
-void dfs(const int n, int k, int j, vector<vector<int>> &res, vector<int> &path, vector<bool> &yes) {
-    if(k == 0) {
+void dfs(vector<vector<int>> &res, vector<int> path, const int n, int i, int k) {
+    if (k == 0) {
         res.push_back(path);
         return;
     }
-    else {
-        for(int i = j; i <= n; ++i) {
-            if(yes[i] == false) {
-                path.push_back(i);
-                yes[i] = true;
-                dfs(n, k - 1, i + 1, res, path, yes);
-                path.pop_back();
-                yes[i] = false;
-            }
-        }
+    for (int j = i; j <= n; ++j) {
+        path.push_back(j);
+        dfs(res, path, n, j+1, k-1);
+        path.pop_back();
     }
 }
 
 vector<vector<int>> combine(int n, int k) {
-    vector<vector<int>> res;
     vector<int> path;
-    vector<bool> yes(n + 1, false);
-    dfs(n, k, 1, res, path, yes);
+    vector<vector<int>> res;
+    dfs(res, path, n, 1, k);
     return res;
 }
 ```
-
 
 ##79. Word Search
 ###题目：
@@ -705,6 +700,7 @@ Given a 2D board and a word, find if the word exists in the grid.
 The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those horizontally or vertically neighboring. The same letter cell may not be used more than once.
 
 For example,
+
 Given **board** =
 
 ```
@@ -852,12 +848,14 @@ vector<string> restoreIpAddresses(string s) {
 ###题目：
 Given two words (beginWord and endWord), and a dictionary's word list, find the length of shortest transformation sequence from beginWord to endWord, such that:
 
-Only one letter can be changed at a time
-Each intermediate word must exist in the word list
+* Only one letter can be changed at a time
+
+* Each intermediate word must exist in the word list
 
 For example,
 
 Given:
+
 *beginWord* = **"hit"**
 
 *endWord* = **"cog"**
@@ -927,7 +925,6 @@ public:
 };
 ```
 
-
 ##126. Word Ladder II
 ###题目：
 Given two words (beginWord and endWord), and a dictionary's word list, find all shortest transformation sequence(s) from beginWord to endWord, such that:
@@ -959,7 +956,19 @@ Return
 * All words contain only lowercase alphabetic characters.
 
 ###思路：
+1、需要的数据结构：
 
+unordered_map<string, int> dis：表示string距离初始字符串的距离
+
+vector<vector<string>> level：level[i]存储距离初始字符串距离为i的字典中的字符串
+
+vector<vector<string>> res:存储答案
+
+2、过程：
+
+首先进行BFS，得到dis，然后对dis进行处理得到level;
+
+下面进行dfs，从dis[endWord]层开始遍历level数组，要求数组中元素和上一层元素相差一个字母。
 ###代码：
 
 ```
@@ -1065,7 +1074,9 @@ Return
 ]
 ```
 ###思路：
+遍历所有划分，保证每次划分都能得到一个回文，需要一个额外的函数来判断。
 
+划分到最后一个字符则得到一种结果。
 ###代码：
 
 ```

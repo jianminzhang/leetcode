@@ -7,6 +7,66 @@
 
 更新yes[i]。
 
+##30. Substring with Concatenation of All Words
+###题目：
+You are given a string, s, and a list of words, words, that are all of the same length. Find all starting indices of substring(s) in s that is a concatenation of each word in words exactly once and without any intervening characters.
+
+For example, given:
+
+s: **"barfoothefoobarman"**
+
+words: **["foo", "bar"]**
+
+You should return the indices: **[0,9]**.
+
+(order does not matter).
+###思路：
+容易忽略的问题： words列表中可能会出现重复的单词，不可以将单词映射成编号，重复的单词无法处理，要映射成个数
+
+方法1:
+
+速度不快，但是想法比较直接。
+
+使用两个hash，hash1记录words列表中每个单词出现的次数，hash2在每一次根据起始位置进行遍历的过程中，记录这个连续子串中出现的合法单词的个数。每次hash2与hash1进行比较。
+
+方法2：
+
+速度快，不容易理解
+
+借鉴：
+[思路1](https://discuss.leetcode.com/topic/7552/my-ac-c-code-o-n-complexity-26ms) 
+[思路2](https://discuss.leetcode.com/topic/6617/an-o-n-solution-with-detailed-explanation)
+###代码：
+
+```
+//方法1：
+vector<int> findSubstring(string s, vector<string>& words) {
+    int len = s.size(), n = words.size();
+    vector<int> res;
+    if (!len || !n) return res;
+    int m = words[0].size();
+    
+    unordered_map<string, int> hash;
+    for (int i = 0; i < n; ++i) hash[words[i]]++;
+    
+    for (int i = 0; i <= (len - m * n); ++i) {
+        unordered_map<string, int> H;
+        int num = 0;
+        for (int j = i; j <= (i + m * n - m); j += m) {
+            string nn = s.substr(j, m);
+            if (hash.find(nn) == hash.end()) break;
+            else if (H.find(nn) != H.end() && H[nn] >= hash[nn]) break;
+            else {
+                num++;
+                H[nn]++;
+            }
+        }
+        if (num == n) res.push_back(i);
+    }
+    return res;
+}
+```
+
 ##49. Group Anagrams
 hash 表示 `<string, vector`< string>` >` 或者 `<string, int >`都可以。
 

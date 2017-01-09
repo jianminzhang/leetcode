@@ -347,6 +347,39 @@ Output: "0"
 Explanation: Remove all the digits from the number and it is left with nothing which is 0.
 ```
 ###思路：
+可以用res来表示结果
 
+去掉原来字符串中的某k个，那么我们可以理解为依次放入结果过程中，是否被替换，被替换一次，那么等于去掉了一位。
+
+依次从左向右处理num中的字符，如果res为空，res加上num[i]，
+
+否则，while循环判断是否满足```num[i] < res.back() && k > 0```,满足的话res.pop_back()，且k--，跳出循环后res += num[i]。
+
+处理开头是‘0’的情况，要找到第一个不是0的位置，这里要注意处理剩下的数字都是0的情况；
+
+最后有可能去掉的字母全部是后面的，那么直接截断到应该要输出的长度。
 ###代码：
 
+```
+string removeKdigits(string num, int k) {
+    string res;
+    int len = num.size(), resLen = len - k;
+    if (k == len) return "0";
+    for (int i = 0; i < len; ++i) {
+        if (res.empty()) res += num[i];
+        else {
+            while (res.size() > 0 && num[i] < res.back() && k > 0) {
+                res.pop_back();
+                k--;
+            }
+            res += num[i];
+        }
+    }
+    int now = 0;
+    while (now < resLen && res[now] == '0') now++;
+    return now == resLen ? "0" : res.substr(now, resLen);
+}
+```
+
+##456. 132 Pattern
+###t

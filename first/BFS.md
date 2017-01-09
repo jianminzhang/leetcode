@@ -42,12 +42,12 @@ void solve(vector<vector<char>>& board) {
 		check(board, 0, j, row, col);
 		if(row>1) check(board, row-1, j, row, col);
 	}
-	for (i=0;i<row;i++)
-		for(j=0;j<col;j++)
-			if(board[i][j]=='O') board[i][j]='X';
-	for (i=0;i<row;i++)
-		for(j=0;j<col;j++)
-			if(board[i][j]=='1') board[i][j]='O';
+	for (i = 0; i < row;i++)
+		for(j = 0;j < col;j++)
+			if(board[i][j] == 'O') board[i][j] = 'X';
+	for (i = 0; i < row; i++)
+		for(j = 0; j < col; j++)
+			if(board[i][j] == '1') board[i][j] = 'O';
 }
 void check(vector<vector<char> >&vec, int i, int j, int row, int col) {
 	if (vec[i][j] == 'O') {

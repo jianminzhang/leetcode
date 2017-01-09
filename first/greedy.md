@@ -44,3 +44,77 @@ int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
     return -1;
 }
 ```
+##135. Candy
+###题目：
+There are N children standing in a line. Each child is assigned a rating value.
+
+You are giving candies to these children subjected to the following requirements:
+
+* Each child must have at least one candy.
+* Children with a higher rating get more candies than their neighbors.
+
+What is the minimum candies you must give?
+
+###思路：
+**方法1：空间复杂度O(N),时间复杂度O(N)**
+
+用num数组来记录位置为i的孩子能获得的糖果数量
+
+遍历两次ratings数组，一遍从左向右遍历，一次从右向左遍历。
+
+从左向右：保证num[i] 和 num[i-1] 的关系符合要求；
+
+从右向左：保证num[i] 和 num[i+1] 的关系满足要求。从右向左将num加和得到结果。
+
+**方法2：空间复杂度为O(1), 时间复杂度为O(N)**
+
+只需要从左向右遍历一次ratings数组。参考[解释](https://discuss.leetcode.com/topic/17722/two-c-solutions-given-with-explanation-both-with-o-n-time-one-with-o-1-space-the-other-with-o-n-space)
+###代码：
+
+```
+//方法1：
+int candy(vector<int>& ratings) {
+    int len = ratings.size();
+    vector<int> num(len, 1);
+    for (int i = 1; i < len; ++i) 
+        num[i] = (ratings[i] > ratings[i-1] ? num[i-1] + 1 : 1);
+    int res = num[len-1];
+    for (int i = len-2; i >= 0; --i) {
+        if (ratings[i] > ratings[i+1] && num[i] < (num[i+1] + 1)) num[i] = num[i+1] + 1;
+        res += num[i];
+    }
+    return res;
+}
+
+
+//方法2：
+int candy(vector<int>& ratings) {
+    const int len = ratings.size();
+    if (len<=1) return len;
+    int i, pPos, res=1, peak=1; // peak: # candies given to the i-1 child
+    bool neg_peak = false; // flag to indicate if it is a local dip
+    for (i=1; i<len;i++) {
+        if(ratings[i] >= ratings[i-1]) {   // it is increasing
+            if(neg_peak) {  
+                // it is a local dip, we need to make sure i-1 has one candy
+                res -= (peak-1) * (i-pPos - (peak>0));
+                peak = 1;
+                neg_peak = false;
+            }
+            // update child i candy number, if equal, set to 1
+            peak = (ratings[i] == ratings[i-1]) ? 1 : ++peak;
+            res += peak;
+        }
+        else { 
+        // decreasing, just give one less candy, if it is the starting point of a decrease, update pPos
+        	  if(!neg_peak) {
+            		pPos = i-1; 
+            		neg_peak = true;
+            }
+            res += --peak;
+        }
+    }
+	// don't forget to update res, if the last one is a local dip
+   return !neg_peak? res : res - (peak-1) * (i-pPos - (peak>0));
+}
+```

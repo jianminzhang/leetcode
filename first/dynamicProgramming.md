@@ -23,6 +23,18 @@ isMatch("ab", ".*") → true
 isMatch("aab", "c*a*b") → true
 ```
 ###思路：
+**状态：**
+
+f[i][j]：代表s的0-i和p的0-j是否可以匹配
+
+**转移：**
+
+
+
+**初始化：**
+
+
+
 
 1、注意想清楚状态和转移；
 
@@ -63,7 +75,7 @@ bool isMatch(string s, string p) {
     return f[x][lenp];
 }
 ```
-##32. Longest Valid Parentheses
+##32. Longest Valid Parentheses **
 ###题目：
 Given a string containing just the characters **'('** and **')'**, find the length of the longest valid (well-formed) parentheses substring.
 
@@ -201,6 +213,10 @@ How many possible unique paths are there?
 
 **Note:** *m* and *n* will be at most 100.
 ###思路：
+注意memset只能将数组的每一个值设置成-1或者0，其他不可以！！
+
+**1、 方法1：**
+
 **状态：**
 
 f[i][j]代表机器人从左上角走到(i,j)位置处有多少种方法。
@@ -215,9 +231,16 @@ f[i][j] = f[i-1][j] + f[i][j-1]。
 
 f[0][i] = 1, f[i][0] = 1
 
+**2、方法2：状态压缩**
+
+f[i] = f[i] + f[i-1]
+
+由于f[i]是上一行在这一列的结果相当于f[i-1][j]，f[i-1]相当于f[i][j-1]
+
 ###代码：
 
 ```
+//方法1：
 int uniquePaths(int m, int n) {
     if(m == 0) return 0;
     int f[m][n];
@@ -229,6 +252,15 @@ int uniquePaths(int m, int n) {
             f[i][j] = f[i-1][j] + f[i][j-1];
     
     return f[m-1][n-1];
+}
+
+//方法2：
+int uniquePaths(int m, int n) {
+    vector<int> f(n, 1);
+    for(int i = 1; i < m; ++i) 
+        for(int j = 1; j < n; ++j) 
+            f[j] = f[j] + f[j-1];
+    return f[n-1];
 }
 ```
 
@@ -316,6 +348,10 @@ f[i][j] = min(f[i-1][j], f[i][j-1]) + grid[i][j]。
 f[0][i] = grid[0][i] + f[0][i-1]
 
 f[i][0] = grid[i][0] + f[i-1][0]
+
+还是可以状态压缩
+
+
 ###代码：
 
 ```
@@ -536,6 +572,144 @@ int numDecodings(string s) {
 }
 ```
 
+##95. Unique Binary Search Trees II
+###题目：
+Given an integer n, generate all structurally unique BST's (binary search trees) that store values 1...n.
+
+For example,
+
+Given n = 3, your program should return all 5 unique BST's shown below.
+
+```
+   1         3     3      2      1
+    \       /     /      / \      \
+     3     2     1      1   3      2
+    /     /       \                 \
+   2     1         2                 3
+```
+###思路：
+问题：TreeNode* root = new TreeNode(i);//不可以调换位置到循环外面
+
+###代码：
+```
+//方法1：没有用到动态规划
+vector<TreeNode*> generateT(int low, int up) {
+    vector<TreeNode*> res;
+    if(up < low) {
+        res.push_back(NULL);
+        return res;
+    }
+    for(int i = low; i <= up; ++i) {
+        vector<TreeNode*> left = generateT(low, i-1);
+        vector<TreeNode*> right = generateT(i+1, up);
+        
+        for(auto j : left) {
+            for(auto k : right) {
+                TreeNode* root = new TreeNode(i);//不可以调换位置到循环外面
+                root->left = j;
+                root->right = k;
+                res.push_back(root);
+            }
+        }
+    }
+    return res;
+}
+vector<TreeNode*> generateTrees(int n) {
+    vector<TreeNode*> res;
+    if(n != 0) {
+        res = generateT(1, n);
+    }
+    return res;
+}
+
+//方法2：用动态规划
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* addTree(TreeNode* root, int k) {
+        if(root == NULL) return NULL;
+        TreeNode* nr = new TreeNode(root->val + k);
+        nr->left = addTree(root->left, k);
+        nr->right = addTree(root->right, k);
+        return nr;
+    }
+    vector<TreeNode*> generateTrees(int n) {
+        vector<vector<TreeNode*> > f(n+1);
+        if(n == 0) return f[0];
+        if(n == 1) return {new TreeNode(1)};
+        f[0] = {new TreeNode(0)};
+        f[1] = {new TreeNode(1)};
+        for(int i = 2; i <= n; i++) {
+            vector<TreeNode*> t;
+            for(int j = 1; j <= i; j++) {
+                for(int ii = 0; ii < f[j-1].size(); ii++) {
+                    for(int jj = 0; jj < f[i-j].size(); jj++) {
+                        TreeNode* root = new TreeNode(j);
+                        if(j-1 == 0) {
+                            root->left = NULL;
+                        }
+                        else{
+                            root->left = f[j-1][ii];
+                        }
+                        if(i-j == 0) {
+                            root->right = NULL;
+                        }
+                        else {
+                            root->right = addTree(f[i-j][jj], root->val);
+                        }
+                        t.push_back(root);
+                    }
+                }
+            }
+            
+            f[i] = t;
+        }
+        return f[n];
+    }
+};
+```
+
+##96. Unique Binary Search Trees
+###题目：
+Given n, how many structurally unique BST's (binary search trees) that store values 1...n?
+
+For example,
+
+Given n = 3, there are a total of 5 unique BST's.
+
+```
+   1         3     3      2      1
+    \       /     /      / \      \
+     3     2     1      1   3      2
+    /     /       \                 \
+   2     1         2                 3
+```
+###思路：
+f[i]记录节点个数为i的BST树的个数。
+
+节点个数为i，则可认为是 n种左子树 * m种右子树的结果。
+
+###代码：
+```
+int numTrees(int n) {
+    int f[n+1] = {0};
+    f[0] = f[1] = 1;
+    for(int i = 2; i <= n; ++i) {
+        for(int j = 0; j < i; ++j) {
+            f[i] += f[j] * f[i-1-j];
+        }
+    }
+    return f[n];
+}
+```
 
 ##97. Interleaving String
 ###题目：
@@ -674,17 +848,17 @@ Bonus point if you are able to do this using only *O(n)* extra space, where n is
 ###思路：
 时间复杂度：O(m^2) ,  空间复杂度：O(m^2)
 
-状态：
+**状态：**
 
 int f[i][j]: 代表第i行的第j个位置为终点，从顶到这里的最小路径和。
 
-转移：
+**转移：**
 
 由于题意的相邻，在这里观察可得，只和上一行同一位置和上一个位置有关。
 
 f[i][j] = min(f[i-1][j], f[i-1][j-1]) + triangle[i][j]
 
-初始化：
+**初始化：**
 
 要初始化最左边一列和最右边一列。
 
@@ -790,7 +964,7 @@ int maxProfit(vector<int>& prices) {
 }
 ```
 
-##123. Best Time to Buy and Sell Stock III
+##123. Best Time to Buy and Sell Stock III**
 ###题目：
 Say you have an array for which the ith element is the price of a given stock on day i.
 
@@ -888,10 +1062,47 @@ maxProfit = 3
 transactions = [buy, sell, cooldown, buy, sell]
 ```
 ###思路：
+方法1：
+
+**状态：**
+
+s[i]代表第i天
+
+**转移：**
+
+
+
+**初始化：**
+
+
+
+方法2：
  参考[解释](https://discuss.leetcode.com/topic/31015/very-easy-to-understand-one-pass-o-n-solution-with-no-extra-space)
 ###代码：
 
 ```
+//方法1：
+int maxProfit(vector<int>& p) {
+    int len = p.size();
+    if(len == 0) return 0;
+    vector<int> b(len, 0);
+    vector<int> s(len, 0);
+    b[0] = 0 - p[0];
+    s[0] = 0;
+    int res = 0;
+    for(int i = 1; i < len; i++) {
+        s[i] = max(b[i-1]+p[i], s[i-1]-p[i-1]+p[i]);
+        res = max(res, s[i]);
+        if(i == 1) {
+            b[i] = 0-p[i];
+            continue;
+        }
+        b[i] = max(s[i-2]-p[i], b[i-1]+p[i-1]-p[i]);
+    }
+    return res;
+}
+
+//方法2：
 int maxProfit(vector<int>& prices) {
 	int L = prices.size();
 	if(L < 2) return 0;
@@ -1896,10 +2107,47 @@ Given a particular **n ≥ 1**, find out how much money you need to have to guar
 * As a follow-up, how would you modify your code to solve the problem of minimizing the expected loss, instead of the worst-case loss?
 
 ###思路：
+**状态**
 
+f[i][j]:表示从区间[i, j]的最大代价的最小值
+
+f[1][n]为答案
+
+**转移**
+
+外层循环是区间右边界，中间层循环是区间左边界，内层循环是中间猜的位置
+
+```
+int globalMin = INT_MAX;
+for(int k = i+1; k < j; k++){
+    int localMax = k + max(table[i][k-1], table[k+1][j]);
+    globalMin = min(globalMin, localMax);
+}
+table[i][j] = (i + 1 == j ? i : globalMin);
+```
+ **初始化**
+
+vector<vector<int>> table(n+1, vector<int>(n+1, 0));
 
 ###代码：
 
+```
+int getMoneyAmount(int n) {
+    vector<vector<int>> table(n+1, vector<int>(n+1, 0));
+    
+    for(int j = 2; j <= n; j++){
+        for(int i = j - 1; i > 0; i--){
+            int globalMin = INT_MAX;
+            for(int k = i+1; k < j; k++){
+                int localMax = k + max(table[i][k-1], table[k+1][j]);
+                globalMin = min(globalMin, localMax);
+            }
+            table[i][j] = (i + 1 == j ? i : globalMin);
+        }
+    }
+    return table[1][n];
+}
+```
 
 
 ##376. Wiggle Subsequence
@@ -1928,6 +2176,7 @@ Output: 2
 
 Can you do it in O(n) time?
 ###思路：
+//方法1：
 如果个数小于等于1，那么直接返回个数；
 
 sig记录上一个趋势，即前两个数中后一个减去前一个是正还是负。开始是0，这里正的用1表示，负的用-1表示。
@@ -1939,9 +2188,18 @@ pre记录上一个数， res记录答案个数。
 如果当前数字减去pre和sig符号相同，说明并不符合规则，更新pre；
 
 如果当前数字减去pre和sig符号不同，说明符合规则，更新sig和pre，res++。
+
+//方法2：
+
+cnt1表示结尾是上升的串的个数，cnt2表示结尾是下降的串的个数
+
+如果遇到下降，那么cnt2 = cnt1 + 1;
+
+如果遇到上升，那么cnt1 = cnt2 + 1;
 ###代码：
 
 ```
+//方法1：
 int wiggleMaxLength(vector<int>& nums) {
     int len = nums.size();
     if(len < 2) return len;
@@ -1963,6 +2221,15 @@ int wiggleMaxLength(vector<int>& nums) {
         }
     }
     return res;
+}
+
+//方法2：
+int wiggleMaxLength(vector<int>& nums) {
+	int count1 = 1, count2 = 1;
+	for(int i = 1; i < nums.size(); ++i) 
+	    if(nums[i] > nums[i-1]) count1 = count2 + 1;
+	    else if(nums[i] < nums[i-1]) count2 = count1 + 1;
+	return nums.size() == 0 ? 0 : max(count1, count2);
 }
 ```
 

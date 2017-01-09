@@ -1,5 +1,73 @@
 #Binary Search
 
+##4. Median of Two Sorted Arrays**
+###题目：
+There are two sorted arrays **nums1** and **nums2** of size m and n respectively.
+
+Find the median of the two sorted arrays. The overall run time complexity should be O(log (m+n)).
+
+**Example 1:**
+
+```
+nums1 = [1, 3]
+nums2 = [2]
+
+The median is 2.0
+```
+**Example 2:**
+
+```
+nums1 = [1, 2]
+nums2 = [3, 4]
+
+The median is (2 + 3)/2 = 2.5
+```
+###思路：
+题目需要找两个排序数组的中位数，可拓展为求两个排序数组的第K位
+
+总位数为奇数：相当于是求其第（m + n + 1）/ 2个数
+
+总位数为偶数：相当于是求其第（m + n）/ 2 个数 和 第（m + n）/ 2 + 1 个数的平均
+
+二分的思想：求第k个，可以先在两个数组从左向右确定k/2个数，比较最后一个，如果某数组第k/2个小于另外一个数组，那么那个数组的前k/2个数被忽略
+
+**边界：**
+
+1、首先需要保证nums1 < nums2；
+
+2、pa = min(k / 2, m)，因为第一个数组小于第二个，有可能并不存在k/2个数
+
+3、m == 0时，返回第二个数组的第k个
+
+4、k == 1时，返回两个数组首个数字中较小的那个
+###代码：
+
+```
+double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+    int m = nums1.size(), n = nums2.size();
+    double res = 0.0;
+    if ((m + n) % 2) res = findKth((m + n + 1) / 2, nums1.begin(), m, nums2.begin(), n) * 1.0;
+    else {
+        int kth = findKth((m + n) / 2, nums1.begin(), m, nums2.begin(), n);
+        int k1th = findKth((m + n) / 2 + 1, nums1.begin(), m, nums2.begin(), n);
+        res = (kth + k1th) / 2.0;
+    }
+    return res;
+}
+
+int findKth(int k, vector<int>::iterator it1, int m, vector<int>::iterator it2, int n) {
+    if (m > n) return findKth(k, it2, n, it1, m);
+    if (m == 0) return *(it2 + k - 1);
+    if (k == 1) return min(*it1, *it2);
+    int pa = min(k / 2, m);
+    int pb = k - pa;
+    if (*(it1 + pa - 1) == *(it2 + pb - 1)) return *(it1 + pa - 1);
+    else if (*(it1 + pa - 1) < *(it2 + pb - 1)) return findKth(k - pa, it1 + pa, m - pa, it2, n);
+    else return findKth(k - pb, it1, m, it2 + pb, n - pb);
+}
+```
+
+
 ##29. Divide Two Integers*
 ###题目：
 Divide two integers without using multiplication, division and mod operator.
@@ -355,9 +423,33 @@ Find the minimum element.
 
 The array may contain duplicates.
 ###思路:
+这里只有在处理```nums[mid] == nums[right]```时，和没有重复的不一样。
 
+如果有重复，且重复很多，复杂度会增加，因为每次不考虑的数字变少了，原来是直接不考虑一半，这里只能一个一个排除，如果全部都是相等的，那么会变成O(n)。
 ###代码：
 
+```
+int findMin(vector<int>& num) {
+    int lo = 0;
+    int hi = num.size() - 1;
+    int mid = 0;
+    
+    while (lo < hi) {
+        mid = lo + (hi - lo) / 2;
+        
+        if (num[mid] > num[hi]) {
+            lo = mid + 1;
+        }
+        else if (num[mid] < num[hi]) {
+            hi = mid;
+        }
+        else { // when num[mid] and num[hi] are same
+            hi--;
+        }
+    }
+    return num[lo];
+}
+```
 
 ##162. Find Peak Element*
 ###题目：
@@ -377,8 +469,11 @@ click to show spoilers.
 
 Your solution should be in logarithmic complexity.
 ###思路：
-找到一个比右边的值大的，如果比右边的小，就向右移动，否则记录。
+找到第一个比右边的值大的元素即可，因为他左边的数字不比右边的元素大，说明它大于左边的元素，且它大于右边的元素。
 
+这里首先保证了不存在相等的数字相邻的情况。
+
+如果比右边的小，就向右移动，否则记录。
 ###代码：
 
 ```
@@ -387,7 +482,7 @@ int findPeakElement(const vector<int> &num) {
     int right = num.size()-1;
     while(left<right){
         int mid = (right+left)/2;
-        if(num[mid]<num[mid+1]){
+        if(num[mid] < num[mid+1]){
             left = mid+1;
         }
         else right = mid;
