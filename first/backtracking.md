@@ -1,4 +1,91 @@
 #Backtracking
+##10. Regular Expression Matching
+###题目：
+```
+Implement regular expression matching with support for '.' and '*'.
+
+'.' Matches any single character.
+'*' Matches zero or more of the preceding element.
+
+The matching should cover the entire input string (not partial).
+
+The function prototype should be:
+bool isMatch(const char *s, const char *p)
+
+Some examples:
+
+isMatch("aa","a") → false
+isMatch("aa","aa") → true
+isMatch("aaa","aa") → false
+isMatch("aa", "a*") → true
+isMatch("aa", ".*") → true
+isMatch("ab", ".*") → true
+isMatch("aab", "c*a*b") → true
+```
+###思路：
+**状态：**
+
+bool f[i][j]：代表s的0-i和p的0-j是否可以匹配
+
+**转移：**
+
+```
+if(p[j-1] != '*') {
+    f[x][j] = f[1^x][j-1] && (s[i-1] == p[j-1] || p[j-1] == '.');
+}
+else {
+    f[x][j] = f[x][j-2] || (f[1^x][j] && (s[i-1] == p[j-2] || p[j-2] == '.'));
+}
+```
+**初始化：**
+
+```
+for(int i = 2; i <= lenp; i+=2) {
+	if(p[i-1] == '*') f[0][i] = true;
+  	else break;
+}
+```
+
+1、注意想清楚状态和转移；
+
+2、注意初始化的时候要用memset, 每隔一个判断是否等于*并且一旦不等于就要退出；
+
+3、要注意下标；
+
+4、滚动数组的转移一定要记得j从0开始，只转移f[x][0]即可。
+
+###代码
+
+```
+bool isMatch(string s, string p) {
+	int lens = s.size(), lenp = p.size();
+	bool f[2][lenp+1];
+	memset(f, false, sizeof(f));
+   	f[0][0] = true;
+        
+   	for(int i = 2; i <= lenp; i+=2) {
+   		if(p[i-1] == '*') f[0][i] = true;
+      	else break;
+   }
+   
+   int x = 0;
+   for(int i = 1; i <= lens; ++i) {
+        x = 1 ^ x;
+        for(int j = 1; j <= lenp; ++j) {
+            if(p[j-1] != '*') {
+                f[x][j] = f[1^x][j-1] && (s[i-1] == p[j-1] || p[j-1] == '.');
+            }
+            else {
+                f[x][j] = f[x][j-2] || (f[1^x][j] && (s[i-1] == p[j-2] || p[j-2] == '.'));
+            }
+        }
+        f[1^x][0] = f[x][0];
+    }
+    
+    return f[x][lenp];
+}
+```
+
 ##17. Letter Combinations of a Phone Number
 ###题目：
 Given a digit string, return all possible letter combinations that the number could represent.
@@ -157,11 +244,11 @@ private:
 
 ##39. Combination Sum
 ###题目：
-Given a set of candidate numbers (**C**) and a target number (**T**), find all unique combinations in **C** where the candidate numbers sums to **T**.
+Given a set of candidate numbers (C) (without duplicates) and a target number (T), find all unique combinations in C where the candidate numbers sums to T.
 
-The **same** repeated number may be chosen from **C** unlimited number of times.
+The same repeated number may be chosen from C unlimited number of times.
 
-**Note:**
+Note:
 
 * All numbers (including target) will be positive integers.
 * The solution set must not contain duplicate combinations.
@@ -177,12 +264,6 @@ A solution set is:
 ]
 ```
 ###思路：
-问题：
-
-这里的path是否传引用
-
-注意这里对于重复的定义，这里每个数字都是不一样的，不论大小是否相同。
-
 
 ###代码：
 
@@ -216,7 +297,7 @@ Given a collection of candidate numbers (C) and a target number (T), find all un
 
 Each number in C may only be used once in the combination.
 
-Note:
+**Note:**
 
 * All numbers (including target) will be positive integers.
 * The solution set must not contain duplicate combinations.
@@ -377,7 +458,7 @@ vector<vector<int>> permute(vector<int>& nums) {
 }
 
 //方法2：
-void dfs(vector<int> nums, vector<vector<int>> &res, int i, const int len) {
+void dfs(vector<int> &nums, vector<vector<int>> &res, int i, const int len) {
     if(i == len - 1) {
         res.push_back(nums);
         return;
@@ -386,13 +467,13 @@ void dfs(vector<int> nums, vector<vector<int>> &res, int i, const int len) {
         for(int j = i; j < len; ++j) {
             swap(nums[i], nums[j]);
             dfs(nums, res, i+1, len);
+            swap(nums[i],nums[j]);
         }
     }
 }
-
+    
 vector<vector<int>> permute(vector<int>& nums) {
     int len = nums.size();
-    sort(nums.begin(), nums.end());
     vector<vector<int>> res;
     dfs(nums, res, 0, len);
     return res;
@@ -446,6 +527,7 @@ vector<vector<int>> permuteUnique(vector<int>& nums) {
     return res;
 }
 ```
+
 ##60. Permutation Sequence
 ###题目：
 The set [1,2,3,…,n] contains a total of n! unique permutations.
@@ -747,7 +829,7 @@ bool exist(vector<vector<char>>& board, string word) {
 }
 ```
 
-##89. Gray Code
+##89. Gray Code **
 ###题目：
 The gray code is a binary numeral system where two successive values differ in only one bit.
 
@@ -769,26 +851,44 @@ For example, **[0,2,3,1]** is also a valid gray code sequence according to the a
 
 For now, the judge is able to judge based on one instance of gray code sequence. Sorry about that.
 ###思路：
-要按照顺序。
+方法1：
+
+格雷码计算公式
+
+方法2：
+
+DFS方法
 ###代码：
 
 ```
-void rec(int start_i, int end_i, int zero_or_one_first, int power, vector<int>* result) {
-    if (power < 0) return;
-    int mid = (start_i + end_i) / 2;
-    int add = (int) pow(2, power);
-    if (zero_or_one_first == 0) {
-        for (int i = mid+1; i <= end_i; i++) (*result)[i] += add;
-    } else {
-        for (int i = start_i; i <= mid; i++) (*result)[i] += add;
+//方法1：
+vector<int> grayCode(int n) {
+    vector<int> res;
+    for (int i = 0; i < 1 << n; i++) {
+        res.push_back(i ^ i >> 1);
     }
-    rec(start_i, mid, 0, power-1, result);
-    rec(mid+1, end_i, 1, power-1, result);
+    return res;
+}
+
+//方法2：
+void findC(vector<int> &res, vector<int>& visited, int num, int n) {
+    if(visited[num]) {
+        return;
+    }
+    res.push_back(num);
+    visited[num] = true;
+    for(int i = 0; i < n; i++) {
+        int c = 1 << i;
+        findC(res, visited, num^c, n);
+    }
 }
 vector<int> grayCode(int n) {
-    vector<int> result((int) pow(2, n), 0);
-    rec(0, (int) pow(2, n) - 1, 0, n-1, &result);
-    return result;
+    if(n == 0) return {0};
+    int c = 1 << n;
+    vector<int> visited(c, false);
+    vector<int> res;
+    findC(res, visited, 0, n);
+    return res;
 }
 ```
 
@@ -842,6 +942,30 @@ vector<string> restoreIpAddresses(string s) {
     back(res, path, 0, 0, len, s);
     return res;
 }
+
+//用三个循环
+bool isValid(string s) {
+    if (atoi(s.c_str()) > 255 || s[0] == '0' && s.size() > 1)
+        return false;
+    return true;
+}    
+public:
+vector<string> restoreIpAddresses(string s) {
+    vector<string> res;
+    int len = s.length();
+    for (int i = 1; i < 4 && i < len-2; i++) {
+        for (int j = i + 1; j < i + 4 && j < len - 1; j++) {
+            for (int k = j + 1; k < j + 4 && k < len; k++) {
+                if (len - k > 3) continue;
+                string s1 = s.substr(0,i), s2 = s.substr(i,j-i), s3 = s.substr(j,k-j), s4 = s.substr(k,len-k);
+                if (isValid(s1) && isValid(s2) && isValid(s3) && isValid(s4))
+                    res.push_back(s1+'.'+s2+'.'+s3+'.'+s4);
+            }
+        }
+    }
+    return res;
+}
+
 ```
 
 ##127. Word Ladder

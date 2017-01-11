@@ -1,4 +1,5 @@
 #Bit Manipulation
+
 ##371. Sum of Two Integers
 ###题意：
 Calculate the sum of two integers a and b, but you are not allowed to use the operator + and -.
@@ -234,11 +235,70 @@ Output: 28
 Explanation: The maximum result is 5 ^ 25 = 28.
 ```
 ###思路：
+时间复杂度 O(N)，建立树和计算数字的XOR结果都是32 * N的复杂度
 
+这个问题的题意很重要，是要计算XOR结果最大值，不是考虑亦或的位数个数，而是要考虑亦或之后组成的结果，在一定程度上亦或不一致的位数越高，结果越大。
 
+使用字典树存储每个数字的每一位，字典树的每个节点为2叉，总共有32层。
+
+关键在于如何根据存有每个数的字典树来计算每个数和其他数之间最大的XOR。
+
+对于每个数的每一位，从高位开始计算，如果与当前位不同值的节点在这个字典树中，那么res << 1 + 1， 下一次字典树指针指向不同值节点，否则res << 1并且下一次回归本身节点。
+
+这样做的依据是，只要高位亦或值不同，那么就放弃相同的树的那一枝，只考虑不一样的那一枝即可，就算相同的那一枝后面每一位都不同，结果也比高位那一个不同得来的结果小。
 ###代码：
 
+```
+class TrieNode {
+public:
+    TrieNode *child[2];
+    TrieNode() {
+        child[0] = child[1] = NULL;
+    }
+};
 
+class Solution {
+public:
+    void buildTrie(vector<int>& nums, int len) {
+        root = new TrieNode();
+        for (int i = 0; i < len; ++i) {
+            TrieNode *cur = root;
+            for (int j = 31; j >= 0; --j) {
+                int now = (nums[i] >> j) & 1;
+                if (cur->child[now] == NULL) cur->child[now] = new TrieNode();
+                cur = cur->child[now];
+            }
+        }
+    }
+    
+    int findMaximumXOR(vector<int>& nums) {
+        int len = nums.size();
+        buildTrie(nums, len);
+        int res = 0;
+        for (int i = 0; i < len; ++i) {
+            TrieNode *cur = root;
+            int nowRes = 0;
+            for (int j = 31; j >= 0; --j) {
+                int index = nums[i] >> j & 1 ? 0 : 1;
+                if (cur->child[index] != NULL) {
+                    nowRes <<= 1;
+                    nowRes += 1;
+                    cur = cur->child[index];
+                }
+                else {
+                    nowRes <<= 1;
+                    index = (index == 1 ? 0 : 1);
+                    cur = cur->child[index];
+                }
+            }
+            res = max(res, nowRes);
+        }
+        return res;
+    }
+private:
+    TrieNode *root;
+};
+```
 
 ##461. Hamming Distance
 ###题意：
